@@ -1,5 +1,7 @@
 source 'http://rubygems.org'
 
+gem uninstall bundler -v ">= 2.0" 
+gem install bundler -v "< 2.0" 
 gem 'rough'
 gem 'jekyll-paginate'
 gem 'jekyll-geo-pattern'

@@ -1,6 +1,6 @@
 <!-- .blog -->
 <div id="blog" class="content_2">
-<h1 class="h-bloc">Blog - My Blog</h1><br> 
+<h1 class="h-bloc">Blog - Jhon Blog</h1><br> 
 
 <div class="col-md-12">
     <div class="row">
@@ -37,7 +37,56 @@
                                                     <img src="images/blog/blog-1.jpg" alt="" />
                                                     <div class="carousel-caption">
                                                         <h4>First Thumbnail label</h4>
-                                                        <p>Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus. Nullam id dolor id nibh ultricies vehicula ut id elit.</p>
+                                                        <p>package Spanish_Dijkstra;
+
+                                                            import java.util.PriorityQueue;
+                                                            import java.util.Stack;
+                                                            
+                                                            /**
+                                                             *
+                                                             * @author Fenix
+                                                             * Version no dirigida, llevo los extremos con enteros
+                                                             */
+                                                            public class Dijkstra {
+                                                                
+                                                                PriorityQueue colaPrioridad; 
+                                                                public  double[] distanciaHacia; 
+                                                                public Arcos[] historialRutas; 
+                                                                private int indiceFuente; 
+                                                                
+                                                                public Dijkstra(GrafoPonderado G,int indiceFuente) {
+                                                                       distanciaHacia = new double[G.V()];
+                                                                       historialRutas = new Arcos[G.V()];
+                                                                       this.indiceFuente = indiceFuente;
+                                                                       validarIndicesVertice(indiceFuente);
+                                                                       chequearTodosVerticesPositivos(G);
+                                                                       establecerTodaslasDistaciasinfinitas(G.V());
+                                                                       
+                                                                       distanciaHacia[indiceFuente] = 0.0; // distancia inicial al vertice arranque
+                                                                       colaPrioridad = new PriorityQueue<VerticeyDistancia>(G.V());
+                                                                       VerticeyDistancia verticeArranque = new VerticeyDistancia(indiceFuente,distanciaHacia[indiceFuente]); 
+                                                                       colaPrioridad.add(verticeArranque);
+                                                                    while(!colaPrioridad.isEmpty()){
+                                                                        VerticeyDistancia este = (VerticeyDistancia)colaPrioridad.poll(); 
+                                                                        for( Arcos arcoAsociado : G.arcosAsociadosa(este.vertice)){ 
+                                                                            int elOtroExtremo = arcoAsociado.other(este.vertice); 
+                                                                            
+                                                                            if(distanciaHacia[elOtroExtremo] > distanciaHacia[este.vertice] + arcoAsociado.weight()){
+                                                                                distanciaHacia[elOtroExtremo] = distanciaHacia[este.vertice] + arcoAsociado.weight();
+                                                                                historialRutas[elOtroExtremo] = arcoAsociado;   
+                                                                                VerticeyDistancia t = new VerticeyDistancia(elOtroExtremo, distanciaHacia[elOtroExtremo]);
+                                                                                //si ya lo contiene pero
+                                                                                if(colaPrioridad.contains(t)){
+                                                                                    colaPrioridad.remove(t);
+                                                                                    colaPrioridad.add(t); 
+                                                                                }
+                                                                                else{ 
+                                                                                    colaPrioridad.add(t);
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }</p>
                                                     </div>
                                                 </div>
 

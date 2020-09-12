@@ -36,8 +36,8 @@
                                                 <div class="item active">
                                                     <img src="images/blog/blog-1.jpg" alt="" />
                                                     <div class="carousel-caption">
-                                                        <h4>First Thumbnail label</h4>
-                                                        <p>Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus. Nullam id dolor id nibh ultricies vehicula ut id elit.</p>
+                                                        <h4>Playnite</h4>
+                                                        <p></p>
                                                     </div>
                                                 </div>
 
@@ -45,16 +45,16 @@
                                                 <div class="item">
                                                     <img src="images/blog/blog-2.jpg" alt="" />
                                                     <div class="carousel-caption">
-                                                        <h4>First Thumbnail label</h4>
-                                                        <p>Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus. Nullam id dolor id nibh ultricies vehicula ut id elit.</p>
+                                                        <h4>Awesome</h4>
+                                                        <p></p>
                                                     </div>
                                                 </div>
 
                                                 <div class="item">
                                                     <img src="images/blog/blog-3.jpg" alt="" />
                                                     <div class="carousel-caption">
-                                                        <h4>First Thumbnail label</h4>
-                                                        <p>Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus. Nullam id dolor id nibh ultricies vehicula ut id elit.</p>
+                                                        <h4></h4>
+                                                        <p></p>
                                                     </div>
                                                 </div>
 
@@ -87,63 +87,15 @@
 
                                         <ul class="info">
                                             <li><i class="glyphicon glyphicon-comment"></i> 2 Comments</li>
-                                            <li><i class="glyphicon glyphicon-time"></i> January 31, 2014</li>
-                                            <li><i class="glyphicon glyphicon-user"></i> by Jane Doe</li>
-                                            <li><i class="glyphicon glyphicon-tag"></i> jquery, slider, web design</li>
+                                            <li><i class="glyphicon glyphicon-time"></i> January 31, 2020</li>
+                                            <li><i class="glyphicon glyphicon-user"></i> by Me</li>
+                                            <li><i class="glyphicon glyphicon-tag"></i> Culture, Games</li>
                                         </ul>
 
                                         <div class="blog-content">
-                                            <p><i class="fa fa-quote-left"></i> package Spanish_Dijkstra;
-
-                                                import java.util.PriorityQueue;
-                                                import java.util.Stack;
-                                                
-                                                /**
-                                                 *
-                                                 * @author Fenix
-                                                 * Version no dirigida, llevo los extremos con enteros
-                                                 */
-                                                public class Dijkstra {
-                                                    
-                                                    PriorityQueue colaPrioridad; 
-                                                    public  double[] distanciaHacia; 
-                                                    public Arcos[] historialRutas; 
-                                                    private int indiceFuente; 
-                                                    
-                                                    public Dijkstra(GrafoPonderado G,int indiceFuente) {
-                                                           distanciaHacia = new double[G.V()];
-                                                           historialRutas = new Arcos[G.V()];
-                                                           this.indiceFuente = indiceFuente;
-                                                           validarIndicesVertice(indiceFuente);
-                                                           chequearTodosVerticesPositivos(G);
-                                                           establecerTodaslasDistaciasinfinitas(G.V());
-                                                           
-                                                           distanciaHacia[indiceFuente] = 0.0; // distancia inicial al vertice arranque
-                                                           colaPrioridad = new PriorityQueue<VerticeyDistancia>(G.V());
-                                                           VerticeyDistancia verticeArranque = new VerticeyDistancia(indiceFuente,distanciaHacia[indiceFuente]); 
-                                                           colaPrioridad.add(verticeArranque);
-                                                        while(!colaPrioridad.isEmpty()){
-                                                            VerticeyDistancia este = (VerticeyDistancia)colaPrioridad.poll(); 
-                                                            for( Arcos arcoAsociado : G.arcosAsociadosa(este.vertice)){ 
-                                                                int elOtroExtremo = arcoAsociado.other(este.vertice); 
-                                                                
-                                                                if(distanciaHacia[elOtroExtremo] > distanciaHacia[este.vertice] + arcoAsociado.weight()){
-                                                                    distanciaHacia[elOtroExtremo] = distanciaHacia[este.vertice] + arcoAsociado.weight();
-                                                                    historialRutas[elOtroExtremo] = arcoAsociado;   
-                                                                    VerticeyDistancia t = new VerticeyDistancia(elOtroExtremo, distanciaHacia[elOtroExtremo]);
-                                                                    //si ya lo contiene pero
-                                                                    if(colaPrioridad.contains(t)){
-                                                                        colaPrioridad.remove(t);
-                                                                        colaPrioridad.add(t); 
-                                                                    }
-                                                                    else{ 
-                                                                        colaPrioridad.add(t);
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                    }</p></div>
-                                    </div>
+                                            <p><i class="fa fa-quote-left"></i> Este fue un buen descubrimiento para organizar los juegos "legales". Lastima q aun no lohago funcionar con el steam link</p></div>
+                                            <p><i class="fa fa-quote-left"></i> This is a good program to organize your games, i mean those "legal games" wink wink. Still need to work with steam link </p></div>
+                                        </div>
                                 </div>	
 
                                 <a href="#post-1" class="read_m pull-right">Read More <i class='glyphicon glyphicon-chevron-right'></i></a>

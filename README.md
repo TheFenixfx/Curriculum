@@ -1,2 +1,2 @@
-MY CV and quick Blog
+My CV and quick Blog
 Based on Panel CV, made with Jekyll

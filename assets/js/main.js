@@ -430,7 +430,7 @@ jQuery(document).ready(function($) {
             }, 2000);
         });
 */
-document.getElementsByClassName("skillbar-bar");
+        const Elem = document.getElementsByClassName("skillbar-bar");
         Elem.style.position = "absolute";
         Elem.animate({
            width: ['8px', '280px']

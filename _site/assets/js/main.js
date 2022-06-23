@@ -423,13 +423,14 @@ jQuery(document).ready(function($) {
         $('.skillbar').each(function() {
             $(this).find('.skillbar-bar').width(0);
         });
-/*
+
         $('.skillbar').each(function() {
             $(this).find('.skillbar-bar').animate({
                 width: $(this).attr('data-percent')
             }, 2000);
         });
-*/
+
+/*
         const Elem = document.getElementBy("skillbar-bar");
          Elem.style.position = "absolute";
          Elem.animate({
@@ -443,6 +444,7 @@ jQuery(document).ready(function($) {
 
 
     });
+*/
 
     $('#resume').prev('h2.resp-accordion').click(function() {
 

@@ -423,12 +423,22 @@ jQuery(document).ready(function($) {
         $('.skillbar').each(function() {
             $(this).find('.skillbar-bar').width(0);
         });
-
+/*
         $('.skillbar').each(function() {
             $(this).find('.skillbar-bar').animate({
                 width: $(this).attr('data-percent')
             }, 2000);
         });
+*/
+        document.getElementById("skillbar-bar");
+        Elem.style.position = "absolute";
+        Elem.animate({
+           width: ['8px', '280px']
+                },{ duration: 1760,        // number in ms [this would be equiv of your speed].
+                    easing: 'ease-in-out',
+                    iterations: 1,         // infinity or a number.
+                 // fill: ''
+       });   
 
     });
 

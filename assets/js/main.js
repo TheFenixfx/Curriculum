@@ -114,7 +114,7 @@ jQuery(document).ready(function($) {
     });
 
     $("#verticalTab h2.resp-accordion").click(function() {
-        initialize();
+      //  initialize();
     });
 
     /* ---------------------------------------------------------------------- */
@@ -151,7 +151,7 @@ jQuery(document).ready(function($) {
     window.addEventListener('resize', redimensionnement, false);
 
     $("#verticalTab h2.resp-accordion").click(function() {
-        initialize();
+   //     initialize();
     });
 
     /* ---------------------------------------------------------------------- */
@@ -289,7 +289,7 @@ jQuery(document).ready(function($) {
     /* ---------------------------------------------------------------------- */
     /* ------------------------------ Google Maps --------------------------- */
     /* ---------------------------------------------------------------------- */
-
+/*
     var map;
     function initialize() {
         map = new GMaps({
@@ -309,7 +309,7 @@ jQuery(document).ready(function($) {
             }
         });
     }
-
+*/
     /* ---------------------------------------------------------------------- */
     /* --------------------------------- Blog ------------------------------- */
     /* ---------------------------------------------------------------------- */
@@ -429,17 +429,7 @@ jQuery(document).ready(function($) {
                 width: $(this).attr('data-percent')
             }, 2000);
         });
- /*
-        const Elem = document.getElementsByClassName("skillbar-bar");
-        Elem.style.position = "absolute";
-        Elem.animate({
-           width: ['8px', '280px']
-                },{ duration: 1760,        // number in ms [this would be equiv of your speed].
-                    easing: 'ease-in-out',
-                    iterations: 1,         // infinity or a number.
-                 // fill: ''
-       });   
-*/
+     
     });
 
     $('#resume').prev('h2.resp-accordion').click(function() {

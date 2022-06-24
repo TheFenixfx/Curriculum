@@ -1051,7 +1051,7 @@
     <div class="container-portfolio">
 
         <!-- #filters -->
-        <ul id="filters" class="clearfix">
+        <ul id="filters" class="clearfix" style="display: block">
             <li><span class="filter active" data-filter="mobile backend frontend">Full</span></li>
             <li><span class="filter" data-filter="frontend">Front-end</span></li>
             <li><span class="filter" data-filter="backend">Back-end</span></li>
@@ -2169,7 +2169,7 @@
 <!-- Js | gmaps -->
 <!-- Credits: http://maps.google.com/maps/api/js?sensor=true-->
 
-<script type="text/javascript" src="assets/js/gmaps.min.js"></script>
+<!-- <script type="text/javascript" src="assets/js/gmaps.min.js"></script> -->
 
 <!-- Js | Js -->
 <!-- Credits: http://themeforest.net/user/FlexyCodes -->
@@ -2198,12 +2198,11 @@
     function init() {
 
         /* Instanciate the mouse position variables */
-        mouseX = 0;
+        mouseX = 2000;
         mouseY = 0;
-
         /* Instanciate a HeadImage class for every image */
         imageOne = new HeadImage("one");
-
+        imageOne.setImageDirection()
     }
 
     /* This function is called on mouse move and gets the mouse position. 

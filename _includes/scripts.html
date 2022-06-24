@@ -38,7 +38,7 @@
 <!-- Js | gmaps -->
 <!-- Credits: http://maps.google.com/maps/api/js?sensor=true-->
 
-<script type="text/javascript" src="assets/js/gmaps.min.js"></script>
+<!-- <script type="text/javascript" src="assets/js/gmaps.min.js"></script> -->
 
 <!-- Js | Js -->
 <!-- Credits: http://themeforest.net/user/FlexyCodes -->
@@ -67,12 +67,11 @@
     function init() {
 
         /* Instanciate the mouse position variables */
-        mouseX = 0;
+        mouseX = 2000;
         mouseY = 0;
-
         /* Instanciate a HeadImage class for every image */
         imageOne = new HeadImage("one");
-
+        imageOne.setImageDirection()
     }
 
     /* This function is called on mouse move and gets the mouse position. 

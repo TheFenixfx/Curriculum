@@ -439,9 +439,9 @@ jQuery(document).ready(function($) {
                     iterations: 1,         // infinity or a number.
                  // fill: ''
        });   
-
-    });
 */
+    });
+
     $('#resume').prev('h2.resp-accordion').click(function() {
 
         $('.skillbar').each(function() {

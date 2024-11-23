@@ -29,13 +29,6 @@
     margin: -40px 0 0 -40px;
     background: url(../images/spinner.gif) no-repeat;
 }
-#portfolio .mCSB_container { 
-    margin-right: 0 !important; 
-}
-
-#custumize-style {
-    display: none;
-}
 label {
     font-weight: 400 !important;
 }
@@ -60,7 +53,7 @@ body {
     line-height: 25px;
     color: #333333;
     overflow-x: hidden;
-    background-image: url(../images/bg/bg5.png);
+    background-image: url(assets/images/bg/bg5.png);
     padding: 0;
 }
 h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
@@ -2864,10 +2857,6 @@ li h6{
     -moz-transition: all .3s ease-in;
     -o-transition: all .3s ease-in;
     transition: all .3s ease-in;
-}
-
-div.ppt {
-    display: none !important;
 }
 
 .portfolio-wrapper a img {

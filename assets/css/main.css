@@ -2859,15 +2859,6 @@ li h6{
     transition: all .3s ease-in;
 }
 
-.portfolio-wrapper a img {
-    width: 100%;
-    height: auto;
-    max-width: 100%;                                                                                                                                                                                                               
-    display: block;                                                                                                                                                                                                                
-}
-
-.portfolio-wrapper a {
-    display: block;
-    max-width: 100%;
-    overflow: hidden;
+div.ppt {
+    display: none !important;
 }

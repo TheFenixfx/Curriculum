@@ -53,7 +53,6 @@ body {
     line-height: 25px;
     color: #333333;
     overflow-x: hidden;
-    background-image: url(/images/bg/bg5.png);
     padding: 0;
 }
 h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
@@ -2861,4 +2860,13 @@ li h6{
 
 div.ppt {
     display: none !important;
+}
+
+#background-effect {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* Place effect behind other content */
 }

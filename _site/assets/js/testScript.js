@@ -1,5 +1,5 @@
 
-setTimeout(function() {
+document.addEventListener('DOMContentLoaded', function() {
 const canvas = document.getElementById('background-effect');
 const ctx = canvas.getContext('2d');
 

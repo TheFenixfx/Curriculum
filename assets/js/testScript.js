@@ -1,12 +1,11 @@
 document.addEventListener('DOMContentLoaded', function() {
     const canvas = document.getElementById('background-effect');
-    const ctx = canvas.getContext('2d');
 
-    if (!canvas || !ctx) {
+    if (!canvas) {
         console.error("Canvas element or context not found!");
         return; // Stop further execution if canvas or context is null
     }
-
+    const ctx = canvas.getContext('2d');
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 

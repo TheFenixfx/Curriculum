@@ -55,4 +55,4 @@ document.addEventListener('DOMContentLoaded', function() {
     // Example: Draw a simple rectangle
     ctx.fillStyle = 'rgba(0, 0, 255, 0.2)';
     ctx.fillRect(100, 100, 200, 100);
-    }, 100);
+});

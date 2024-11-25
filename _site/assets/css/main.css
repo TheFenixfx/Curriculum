@@ -52,6 +52,7 @@ ul, li, nav {
     padding: 0;
     list-style: none;
 }
+/*    background-image: url(/images/bg/bg5.png);*/ 
 body {
     margin: 0;
     font-family: 'Lato', sans-serif;
@@ -60,7 +61,6 @@ body {
     line-height: 25px;
     color: #333333;
     overflow-x: hidden;
-    background-image: url(/images/bg/bg5.png);
     padding: 0;
 }
 h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {

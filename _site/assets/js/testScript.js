@@ -1,24 +1,68 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const canvas = document.getElementById('background-effect');
 
-    if (!canvas) {
-        console.error("Canvas element or context not found!");
-        return; // Stop further execution if canvas or context is null
-    }
-    const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+ document.addEventListener('DOMContentLoaded', function() {
+     const canvas = document.getElementById('background-effect');
+     const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+     const scene = new THREE.Scene();
+     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-    // --- Your drawing code goes here ---
-    ctx.fillStyle = 'rgba(0, 0, 255, 0.2)';
-    ctx.fillRect(100, 100, 200, 100);
+     // Resize handling
+     function resizeRendererToDisplaySize(renderer) {
+         const canvas = renderer.domElement;
+         const width = canvas.clientWidth;
+         const height = canvas.clientHeight;
+         const needResize = canvas.width !== width || canvas.height !== height;
+         if (needResize) {
+             renderer.setSize(width, height, false);
+             camera.aspect = width / height;
+             camera.updateProjectionMatrix();
+         }
+         return needResize;
+     }
 
-    // Example: Resize canvas on window resize (if needed)
-    window.addEventListener('resize', function() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        // Redraw your content here after resize
-        ctx.fillStyle = 'rgba(0, 0, 255, 0.2)'; // Example redraw
-        ctx.fillRect(100, 100, 200, 100);       // Example redraw
-    });
-});
+
+     // Wave geometry
+     const geometry = new THREE.PlaneGeometry(20, 20, 100, 100);
+     const material = new THREE.MeshPhongMaterial({ color: 0x0077be, side: THREE.DoubleSide, shininess: 50 }); // Adjust color and shininess
+     const waveMesh = new THREE.Mesh(geometry, material);
+     scene.add(waveMesh);
+
+     // Lighting
+     const light = new THREE.DirectionalLight(0xffffff, 1);
+     light.position.set(1, 1, 1);
+     scene.add(light);
+
+     camera.position.z = 5;
+
+     // Animation loop
+     const animate = function () {
+         requestAnimationFrame(animate);
+                                                                                                                                                                                                              
+         if (resizeRendererToDisplaySize(renderer)) {
+             const canvas = renderer.domElement;
+             camera.aspect = canvas.clientWidth / canvas.clientHeight;
+             camera.updateProjectionMatrix();
+         }
+
+         const time = performance.now() * 0.001; // Get current time in seconds
+
+         // Wave animation
+         const waveAmplitude = 0.5;
+         const waveFrequency = 1;
+         const waveSpeed = 1;
+
+         for (let i = 0; i < geometry.attributes.position.count; i++) {
+             const x = geometry.attributes.position.getX(i);
+             const y = geometry.attributes.position.getY(i);
+
+             const z = waveAmplitude * Math.sin(waveFrequency * x + waveSpeed * time) +
+                       waveAmplitude * Math.cos(waveFrequency * y + waveSpeed * time);
+                                                                                                                                                                                                              
+             geometry.attributes.position.setZ(i, z);
+         }
+         geometry.attributes.position.needsUpdate = true; // Important!
+
+         renderer.render(scene, camera);
+     };
+                                                                                                                                                                                                              
+     animate();
+ });

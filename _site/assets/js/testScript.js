@@ -67,5 +67,5 @@ export function initThreeScene() {  // Export the function that initializes the 
     };
                                                                                                                                                                                                              
     animate();
-}
+};
  document.addEventListener('DOMContentLoaded', initThreeScene );

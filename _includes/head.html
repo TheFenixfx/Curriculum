@@ -1,8 +1,11 @@
     <head>
 
-        <script src="assets/js/testScript.js" defer></script>
+        <!-- <script src="assets/js/testScript.js" defer></script> -->
         <title>Jhon CV</title>
-        <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script> <canvas id="background-effect"></canvas>
+        <script type="module">
+            import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.module.min.js';
+            import 'assets/js/testScript.js'; // Import your script
+        </script>
         <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>

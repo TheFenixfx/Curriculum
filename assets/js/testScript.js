@@ -1,68 +1,71 @@
-
- document.addEventListener('DOMContentLoaded', function() {
-     const canvas = document.getElementById('background-effect');
-     const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
-     const scene = new THREE.Scene();
-     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-
-     // Resize handling
-     function resizeRendererToDisplaySize(renderer) {
-         const canvas = renderer.domElement;
-         const width = canvas.clientWidth;
-         const height = canvas.clientHeight;
-         const needResize = canvas.width !== width || canvas.height !== height;
-         if (needResize) {
-             renderer.setSize(width, height, false);
-             camera.aspect = width / height;
-             camera.updateProjectionMatrix();
-         }
-         return needResize;
-     }
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.module.min.js';
 
 
-     // Wave geometry
-     const geometry = new THREE.PlaneGeometry(20, 20, 100, 100);
-     const material = new THREE.MeshPhongMaterial({ color: 0x0077be, side: THREE.DoubleSide, shininess: 50 }); // Adjust color and shininess
-     const waveMesh = new THREE.Mesh(geometry, material);
-     scene.add(waveMesh);
+export function initThreeScene() {  // Export the function that initializes the scene
+    const canvas = document.getElementById('background-effect');
+    const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-     // Lighting
-     const light = new THREE.DirectionalLight(0xffffff, 1);
-     light.position.set(1, 1, 1);
-     scene.add(light);
+    // Resize handling
+    function resizeRendererToDisplaySize(renderer) {
+        const canvas = renderer.domElement;
+        const width = canvas.clientWidth;
+        const height = canvas.clientHeight;
+        const needResize = canvas.width !== width || canvas.height !== height;
+        if (needResize) {
+            renderer.setSize(width, height, false);
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+        }
+        return needResize;
+    }
 
-     camera.position.z = 5;
 
-     // Animation loop
-     const animate = function () {
-         requestAnimationFrame(animate);
-                                                                                                                                                                                                              
-         if (resizeRendererToDisplaySize(renderer)) {
-             const canvas = renderer.domElement;
-             camera.aspect = canvas.clientWidth / canvas.clientHeight;
-             camera.updateProjectionMatrix();
-         }
+    // Wave geometry
+    const geometry = new THREE.PlaneGeometry(20, 20, 100, 100);
+    const material = new THREE.MeshPhongMaterial({ color: 0x0077be, side: THREE.DoubleSide, shininess: 50 }); // Adjust color and shininess
+    const waveMesh = new THREE.Mesh(geometry, material);
+    scene.add(waveMesh);
 
-         const time = performance.now() * 0.001; // Get current time in seconds
+    // Lighting
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(1, 1, 1);
+    scene.add(light);
 
-         // Wave animation
-         const waveAmplitude = 0.5;
-         const waveFrequency = 1;
-         const waveSpeed = 1;
+    camera.position.z = 5;
 
-         for (let i = 0; i < geometry.attributes.position.count; i++) {
-             const x = geometry.attributes.position.getX(i);
-             const y = geometry.attributes.position.getY(i);
+    // Animation loop
+    const animate = function () {
+        requestAnimationFrame(animate);
+                                                                                                                                                                                                             
+        if (resizeRendererToDisplaySize(renderer)) {
+            const canvas = renderer.domElement;
+            camera.aspect = canvas.clientWidth / canvas.clientHeight;
+            camera.updateProjectionMatrix();
+        }
 
-             const z = waveAmplitude * Math.sin(waveFrequency * x + waveSpeed * time) +
-                       waveAmplitude * Math.cos(waveFrequency * y + waveSpeed * time);
-                                                                                                                                                                                                              
-             geometry.attributes.position.setZ(i, z);
-         }
-         geometry.attributes.position.needsUpdate = true; // Important!
+        const time = performance.now() * 0.001; // Get current time in seconds
 
-         renderer.render(scene, camera);
-     };
-                                                                                                                                                                                                              
-     animate();
- });
+        // Wave animation
+        const waveAmplitude = 0.5;
+        const waveFrequency = 1;
+        const waveSpeed = 1;
+
+        for (let i = 0; i < geometry.attributes.position.count; i++) {
+            const x = geometry.attributes.position.getX(i);
+            const y = geometry.attributes.position.getY(i);
+
+            const z = waveAmplitude * Math.sin(waveFrequency * x + waveSpeed * time) +
+                      waveAmplitude * Math.cos(waveFrequency * y + waveSpeed * time);
+                                                                                                                                                                                                             
+            geometry.attributes.position.setZ(i, z);
+        }
+        geometry.attributes.position.needsUpdate = true; // Important!
+
+        renderer.render(scene, camera);
+    };
+                                                                                                                                                                                                             
+    animate();
+}
+ document.addEventListener('DOMContentLoaded', initThreeScene );

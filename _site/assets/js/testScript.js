@@ -13,9 +13,8 @@ export function initThreeScene() {
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 5;
+    camera.position.z = 10; // Adjusted to fit larger plane geometry
 
-    // Resize handling
     function resizeRendererToDisplaySize(renderer) {
         const canvas = renderer.domElement;
         const width = canvas.clientWidth;
@@ -29,23 +28,20 @@ export function initThreeScene() {
         return needResize;
     }
 
-    // Wave geometry
-    const geometry = new THREE.PlaneGeometry(20, 20, 100, 100);
+    const geometry = new THREE.PlaneGeometry(40, 40, 100, 100); // Larger geometry
     const material = new THREE.MeshPhongMaterial({ color: 0x0077be, side: THREE.DoubleSide, shininess: 50 });
     const waveMesh = new THREE.Mesh(geometry, material);
+    waveMesh.rotation.x = -Math.PI / 2; // Rotate to face up
     scene.add(waveMesh);
 
-    // Lighting
     const light = new THREE.DirectionalLight(0xffffff, 1);
     light.position.set(1, 1, 1);
     scene.add(light);
 
-    const ambientLight = new THREE.AmbientLight(0x404040); // Add ambient light
+    const ambientLight = new THREE.AmbientLight(0x404040);
     scene.add(ambientLight);
 
-    // Animation loop
     const animate = function () {
-        console.log('Animation frame rendered');
         requestAnimationFrame(animate);
 
         if (resizeRendererToDisplaySize(renderer)) {
@@ -54,9 +50,9 @@ export function initThreeScene() {
             camera.updateProjectionMatrix();
         }
 
-        const time = performance.now() * 0.001; // Time in seconds
-        const waveAmplitude = 0.5;
-        const waveFrequency = 1;
+        const time = performance.now() * 0.001;
+        const waveAmplitude = 1.5; // Larger waves
+        const waveFrequency = 0.5; // Wider waves
         const waveSpeed = 1;
 
         for (let i = 0; i < geometry.attributes.position.count; i++) {
@@ -72,9 +68,6 @@ export function initThreeScene() {
     };
 
     animate();
-};
+}
 
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM fully loaded, initializing Three.js scene');
-    initThreeScene();
-});
+document.addEventListener('DOMContentLoaded', initThreeScene);

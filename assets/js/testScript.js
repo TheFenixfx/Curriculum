@@ -1,5 +1,6 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.module.min.js';
 
+
 export function initThreeScene() {
     const canvas = document.getElementById('background-effect');
     if (!canvas) {
@@ -44,6 +45,7 @@ export function initThreeScene() {
 
     // Animation loop
     const animate = function () {
+        console.log('Animation frame rendered');
         requestAnimationFrame(animate);
 
         if (resizeRendererToDisplaySize(renderer)) {
@@ -72,4 +74,7 @@ export function initThreeScene() {
     animate();
 };
 
-document.addEventListener('DOMContentLoaded', initThreeScene);
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM fully loaded, initializing Three.js scene');
+    initThreeScene();
+});

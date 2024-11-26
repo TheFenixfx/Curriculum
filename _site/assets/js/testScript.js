@@ -45,6 +45,7 @@ export function initThreeScene() {
 
     // Animation loop
     const animate = function () {
+        console.log('Animation frame rendered');
         requestAnimationFrame(animate);
 
         if (resizeRendererToDisplaySize(renderer)) {
@@ -73,4 +74,7 @@ export function initThreeScene() {
     animate();
 };
 
-document.addEventListener('DOMContentLoaded', initThreeScene);
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM fully loaded, initializing Three.js scene');
+    initThreeScene();
+});

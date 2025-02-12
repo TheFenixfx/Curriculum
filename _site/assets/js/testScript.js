@@ -40,12 +40,9 @@ export function initThreeScene() {
     waveMesh.rotation.x = -Math.PI / 2; // Rotate to face up
     scene.add(waveMesh);
 
-    const light = new THREE.DirectionalLight(0xffffff, 1);
-    light.position.set(1, 1, 1);
-    scene.add(light);
-
-    const ambientLight = new THREE.AmbientLight(0x404040);
-    scene.add(ambientLight);
+    // Improved lighting for MeshStandardMaterial
+    const hemiLight = new THREE.HemisphereLight( 0xbbbbff, 0x888822, 1 );
+    scene.add( hemiLight );
 
     const animate = function () {
         requestAnimationFrame(animate);

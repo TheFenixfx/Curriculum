@@ -1,20 +1,20 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.module.min.js';
 
 export function initThreeScene() {
-  // Get the canvas and ensure it fills the viewport.
+  // Get the canvas element and ensure it fills the viewport.
   const canvas = document.getElementById('background-effect');
   if (!canvas) {
     console.error("Canvas element with id 'background-effect' not found!");
     return;
   }
-  // Make sure the canvas uses full window dimensions.
+  // Set CSS to fill the entire window.
   canvas.style.width = '100%';
   canvas.style.height = '100%';
   canvas.style.display = 'block';
   canvas.style.margin = '0';
   canvas.style.padding = '0';
 
-  // Create a WebGLRenderer and set it to the full window size.
+  // Create the renderer.
   const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -22,15 +22,13 @@ export function initThreeScene() {
   // Create an empty scene.
   const scene = new THREE.Scene();
 
-  // Use an OrthographicCamera so that our full-screen quad fills the viewport.
-  // The orthographic camera spans from (-1, -1) to (1, 1).
+  // Use an OrthographicCamera so our full-screen quad covers the viewport.
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
-  // Create a plane geometry that spans the full screen.
+  // Create a plane geometry that spans the entire screen.
   const geometry = new THREE.PlaneGeometry(2, 2);
 
-  // Create a ShaderMaterial with uniforms for time and resolution.
-  // The fragment shader computes a Mandelbrot-like fractal and maps the iteration count to pastel hues.
+  // The ShaderMaterial contains our custom vertex and fragment shaders.
   const material = new THREE.ShaderMaterial({
     uniforms: {
       u_time: { value: 0.0 },
@@ -38,7 +36,6 @@ export function initThreeScene() {
     },
     vertexShader: `
       void main() {
-        // Pass through the vertex positions directly.
         gl_Position = vec4(position, 1.0);
       }
     `,
@@ -46,67 +43,65 @@ export function initThreeScene() {
       precision highp float;
       uniform float u_time;
       uniform vec2 u_resolution;
-
-      // Convert a hue value to an RGB color.
-      vec3 hue2rgb(float h) {
-        return vec3(
-          abs(h * 6.0 - 3.0) - 1.0,
-          2.0 - abs(h * 6.0 - 2.0),
-          2.0 - abs(h * 6.0 - 4.0)
-        );
+      
+      // Kaleidoscopic transform: mirror the input into N symmetric sectors.
+      vec2 kaleido(vec2 uv, float sectors) {
+        float angle = atan(uv.y, uv.x);
+        float radius = length(uv);
+        float sectorAngle = 2.0 * 3.14159265 / sectors;
+        angle = mod(angle, sectorAngle);
+        angle = abs(angle - sectorAngle * 0.5);
+        return vec2(radius * cos(angle), radius * sin(angle));
       }
-
-      void main(){
-        // Compute normalized pixel coordinates (from 0 to 1)
-        vec2 uv = gl_FragCoord.xy / u_resolution.xy;
-        // Center coordinates around (0,0) and adjust scale.
-        vec2 c = (uv - 0.5) * 3.0;
-        // Adjust for screen aspect ratio.
-        c.x *= u_resolution.x / u_resolution.y;
-        // Apply a slow animated offset.
-        c += 0.5 * vec2(sin(u_time * 0.2), cos(u_time * 0.2));
-
-        // Mandelbrot iteration:
+      
+      void main() {
+        // Normalize coordinates: center at (0,0) with aspect ratio preserved.
+        vec2 uv = (gl_FragCoord.xy - 0.5 * u_resolution.xy) / u_resolution.y;
+        // Apply a kaleidoscopic transform with 8 sectors.
+        uv = kaleido(uv, 8.0);
+        
+        // Create a fractal by iterating a Mandelbrot-like function.
+        // The fractal is animated by a time-based offset.
+        vec2 c = uv * 1.5 + vec2(sin(u_time * 0.3), cos(u_time * 0.2));
         vec2 z = vec2(0.0);
-        int iter;
-        const int maxIter = 100;
-        for (iter = 0; iter < maxIter; iter++){
-          // z = z^2 + c
-          float x = (z.x * z.x - z.y * z.y) + c.x;
-          float y = (2.0 * z.x * z.y) + c.y;
-          if ((x*x + y*y) > 4.0) break;
-          z = vec2(x, y);
+        float iter = 0.0;
+        const float maxIter = 100.0;
+        for (int i = 0; i < 100; i++) {
+          if (dot(z, z) > 4.0) break;
+          z = vec2(z.x * z.x - z.y * z.y, 2.0 * z.x * z.y) + c;
+          iter += 1.0;
         }
-        float normIter = float(iter) / float(maxIter);
-
-        // Compute a shifting hue based on the normalized iteration count and time.
-        float hue = mod(normIter + u_time * 0.05, 1.0);
-        // Get a pastel color by converting the hue with an offset.
-        vec3 color = 0.5 + 0.5 * hue2rgb(hue);
-
-        // OPTIONAL: Quantize the color to emulate stained-glass segments.
+        float t = iter / maxIter;
+        
+        // Generate a soothing, shifting color based on the fractal iteration.
+        vec3 color = vec3(
+          0.5 + 0.5 * sin(3.14159 * t + u_time),
+          0.5 + 0.5 * sin(3.14159 * t + u_time + 2.0),
+          0.5 + 0.5 * sin(3.14159 * t + u_time + 4.0)
+        );
+        // Quantize the color to emulate stained-glass segments.
         color = floor(color * 8.0) / 8.0;
-
+        
         gl_FragColor = vec4(color, 1.0);
       }
     `
   });
 
-  // Create the mesh (full-screen quad) and add it to the scene.
+  // Create the full-screen quad and add it to the scene.
   const quad = new THREE.Mesh(geometry, material);
   scene.add(quad);
 
-  // Resize handler to update renderer and shader uniform.
+  // Update renderer and shader uniforms on window resize.
   function onWindowResize() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     material.uniforms.u_resolution.value.set(window.innerWidth, window.innerHeight);
   }
   window.addEventListener('resize', onWindowResize);
 
-  // Animation loop: update the time uniform and render the scene.
+  // Animation loop: update time uniform and render.
   function animate(time) {
     requestAnimationFrame(animate);
-    material.uniforms.u_time.value = time * 0.001; // convert to seconds
+    material.uniforms.u_time.value = time * 0.001; // convert time to seconds
     renderer.render(scene, camera);
   }
   animate();

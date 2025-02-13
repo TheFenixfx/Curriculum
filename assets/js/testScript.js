@@ -30,7 +30,15 @@ export function initThreeScene() {
   camera.position.z = 10; // Adjusted to fit larger plane geometry
 
   
-
+  /**
+   * @function resizeRendererToDisplaySize
+   * @description Dynamically adjusts the renderer and camera aspect ratio to match the canvas's display size.
+   *              This function is crucial for responsive canvas behavior, ensuring the 3D scene
+   *              renders correctly on various screen sizes and resolutions. It is called within the
+   *              animate loop to handle real-time resizing and maintain visual integrity.
+   * @param {THREE.WebGLRenderer} renderer - The renderer instance to be adjusted.
+   * @returns {boolean} True if the renderer's size was changed, indicating a resize occurred, false otherwise.
+   */
   function resizeRendererToDisplaySize(renderer) {
 
     const canvas = renderer.domElement;

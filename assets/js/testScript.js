@@ -1,163 +1,114 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.module.min.js';
 
 export function initThreeScene() {
+  // Get the canvas and ensure it fills the viewport.
   const canvas = document.getElementById('background-effect');
   if (!canvas) {
     console.error("Canvas element with id 'background-effect' not found!");
     return;
   }
+  // Make sure the canvas uses full window dimensions.
+  canvas.style.width = '100%';
+  canvas.style.height = '100%';
+  canvas.style.display = 'block';
+  canvas.style.margin = '0';
+  canvas.style.padding = '0';
 
-  // Create the renderer with antialiasing.
+  // Create a WebGLRenderer and set it to the full window size.
   const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
-  // Initial clear color (will be updated every frame).
-  renderer.setClearColor(0x001133);
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setSize(window.innerWidth, window.innerHeight);
 
-  // Create the scene and add a subtle fog.
+  // Create an empty scene.
   const scene = new THREE.Scene();
-  scene.fog = new THREE.Fog(0x001133, 20, 60);
 
-  // Set up a perspective camera.
-  const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-  // Position the camera so that the mountain and sun are both in view.
-  camera.position.set(20, 15, 40);
-  camera.lookAt(new THREE.Vector3(0, 0, 0));
+  // Use an OrthographicCamera so that our full-screen quad fills the viewport.
+  // The orthographic camera spans from (-1, -1) to (1, 1).
+  const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
-  /**
-   * Adjusts renderer and camera aspect ratio based on the canvas's display size.
-   */
-  function resizeRendererToDisplaySize(renderer) {
-    const canvas = renderer.domElement;
-    const width = canvas.clientWidth;
-    const height = canvas.clientHeight;
-    const needResize = canvas.width !== width || canvas.height !== height;
-    if (needResize) {
-      renderer.setSize(width, height, false);
-      camera.aspect = width / height;
-      camera.updateProjectionMatrix();
-    }
-    return needResize;
+  // Create a plane geometry that spans the full screen.
+  const geometry = new THREE.PlaneGeometry(2, 2);
+
+  // Create a ShaderMaterial with uniforms for time and resolution.
+  // The fragment shader computes a Mandelbrot-like fractal and maps the iteration count to pastel hues.
+  const material = new THREE.ShaderMaterial({
+    uniforms: {
+      u_time: { value: 0.0 },
+      u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) }
+    },
+    vertexShader: `
+      void main() {
+        // Pass through the vertex positions directly.
+        gl_Position = vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `
+      precision highp float;
+      uniform float u_time;
+      uniform vec2 u_resolution;
+
+      // Convert a hue value to an RGB color.
+      vec3 hue2rgb(float h) {
+        return vec3(
+          abs(h * 6.0 - 3.0) - 1.0,
+          2.0 - abs(h * 6.0 - 2.0),
+          2.0 - abs(h * 6.0 - 4.0)
+        );
+      }
+
+      void main(){
+        // Compute normalized pixel coordinates (from 0 to 1)
+        vec2 uv = gl_FragCoord.xy / u_resolution.xy;
+        // Center coordinates around (0,0) and adjust scale.
+        vec2 c = (uv - 0.5) * 3.0;
+        // Adjust for screen aspect ratio.
+        c.x *= u_resolution.x / u_resolution.y;
+        // Apply a slow animated offset.
+        c += 0.5 * vec2(sin(u_time * 0.2), cos(u_time * 0.2));
+
+        // Mandelbrot iteration:
+        vec2 z = vec2(0.0);
+        int iter;
+        const int maxIter = 100;
+        for (iter = 0; iter < maxIter; iter++){
+          // z = z^2 + c
+          float x = (z.x * z.x - z.y * z.y) + c.x;
+          float y = (2.0 * z.x * z.y) + c.y;
+          if ((x*x + y*y) > 4.0) break;
+          z = vec2(x, y);
+        }
+        float normIter = float(iter) / float(maxIter);
+
+        // Compute a shifting hue based on the normalized iteration count and time.
+        float hue = mod(normIter + u_time * 0.05, 1.0);
+        // Get a pastel color by converting the hue with an offset.
+        vec3 color = 0.5 + 0.5 * hue2rgb(hue);
+
+        // OPTIONAL: Quantize the color to emulate stained-glass segments.
+        color = floor(color * 8.0) / 8.0;
+
+        gl_FragColor = vec4(color, 1.0);
+      }
+    `
+  });
+
+  // Create the mesh (full-screen quad) and add it to the scene.
+  const quad = new THREE.Mesh(geometry, material);
+  scene.add(quad);
+
+  // Resize handler to update renderer and shader uniform.
+  function onWindowResize() {
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    material.uniforms.u_resolution.value.set(window.innerWidth, window.innerHeight);
   }
+  window.addEventListener('resize', onWindowResize);
 
-  // ─────────────────────────────────────────────
-  // Create the mountain (a static, displaced plane)
-  // ─────────────────────────────────────────────
-
-  // Create a PlaneGeometry; it will be deformed to resemble a rugged mountain.
-  const mountainGeometry = new THREE.PlaneGeometry(40, 40, 200, 200);
-  // Rotate so the plane lies in the XZ plane (with Y as up).
-  mountainGeometry.rotateX(-Math.PI / 2);
-
-  // Parameters for the mountain shape.
-  const mountainPeakHeight = 8; // maximum height
-  const mountainOffsetX = -5;   // offset so the peak is off-center
-
-  // For each vertex, compute a height based on its distance from a chosen “peak center”
-  for (let i = 0; i < mountainGeometry.attributes.position.count; i++) {
-    const x = mountainGeometry.attributes.position.getX(i);
-    const z = mountainGeometry.attributes.position.getZ(i);
-    // Shift the x coordinate so the mountain peak is offset.
-    const dx = x - mountainOffsetX;
-    const d = Math.sqrt(dx * dx + z * z);
-    // A smooth falloff: higher near the center and tapering off with distance.
-    const scale = 50; // larger values yield gentler slopes
-    let height = mountainPeakHeight * Math.exp(-d * d / scale);
-    // Add a bit of sine–based variation for a natural, rugged look.
-    height += 0.5 * Math.sin(x * 0.5) * Math.cos(z * 0.5);
-    // Set the computed height into the Y coordinate.
-    mountainGeometry.attributes.position.setY(i, height);
-  }
-  mountainGeometry.attributes.position.needsUpdate = true;
-  mountainGeometry.computeVertexNormals();
-
-  // Use a MeshPhongMaterial for smooth lighting on the mountain.
-  const mountainMaterial = new THREE.MeshPhongMaterial({ color: 0x444444, flatShading: false });
-  const mountainMesh = new THREE.Mesh(mountainGeometry, mountainMaterial);
-  scene.add(mountainMesh);
-
-  // ─────────────────────────────────────────────
-  // Create the sun (a simple colored circle)
-  // ─────────────────────────────────────────────
-
-  const sunRadius = 3;
-  const sunGeometry = new THREE.CircleGeometry(sunRadius, 32);
-  // A warm golden color for the sun.
-  const sunMaterial = new THREE.MeshBasicMaterial({ color: 0xffcc33 });
-  const sunMesh = new THREE.Mesh(sunGeometry, sunMaterial);
-  // Initially position the sun (its position will be animated).
-  sunMesh.position.set(-15, -5, -30);
-  scene.add(sunMesh);
-
-  // ─────────────────────────────────────────────
-  // Lighting: simulate sunlight using a directional light that follows the sun.
-  // ─────────────────────────────────────────────
-
-  // The directional light will mimic the sun’s rays.
-  const directionalLight = new THREE.DirectionalLight(0xffcc33, 1);
-  directionalLight.position.copy(sunMesh.position);
-  scene.add(directionalLight);
-
-  // A subtle ambient light to fill in shadows.
-  const ambientLight = new THREE.AmbientLight(0x222244, 0.5);
-  scene.add(ambientLight);
-
-  // ─────────────────────────────────────────────
-  // Animate the scene.
-  // ─────────────────────────────────────────────
-
-  const animate = function () {
+  // Animation loop: update the time uniform and render the scene.
+  function animate(time) {
     requestAnimationFrame(animate);
-
-    // Ensure the canvas size is kept up-to-date.
-    if (resizeRendererToDisplaySize(renderer)) {
-      const canvas = renderer.domElement;
-      camera.aspect = canvas.clientWidth / canvas.clientHeight;
-      camera.updateProjectionMatrix();
-    }
-
-    const time = performance.now() * 0.001; // time in seconds
-
-    // Animate the sun along a cyclical path to simulate sunrise-to-sunset.
-    // Cycle period: 20 seconds.
-    const cycle = 20;
-    const tCycle = (time % cycle) / cycle; // normalized time [0,1]
-
-    // Map the cycle to a sun path:
-    // - Sun's Y position goes from below the horizon (-5) to high in the sky (15).
-    // - Its X position shifts gently from -15 to +15.
-    const sunY = -5 + 20 * tCycle; // -5 to 15
-    const sunX = -15 + 30 * tCycle; // -15 to +15
-    sunMesh.position.set(sunX, sunY, -30);
-
-    // Update the directional light to follow the sun.
-    directionalLight.position.copy(sunMesh.position);
-
-    // Adjust light intensities based on sun height.
-    // When the sun is low, the light is soft; as it rises, it becomes brighter.
-    const sunFactor = Math.max(0, Math.min((sunY + 5) / 20, 1)); // 0 when sun is at -5, 1 when sun is at 15
-    ambientLight.intensity = 0.3 + 0.7 * sunFactor;
-    directionalLight.intensity = 0.5 + 1.5 * sunFactor;
-
-    // Update the background (sky) color to evoke a sunrise:
-    // - When the sun is below the horizon, use a deep, moonlit blue.
-    // - As the sun rises, blend from warm sunrise oranges to a light daytime blue.
-    let skyColor = new THREE.Color();
-    if (sunY < 0) {
-      // Nighttime / pre-dawn: deep blue.
-      skyColor.setHSL(0.6, 0.5, 0.1);
-    } else {
-      // Sunrise/day: blend from a warm orange to a soft blue.
-      const mix = Math.min(sunY / 15, 1);
-      const sunriseColor = new THREE.Color();
-      sunriseColor.setHSL(0.1, 0.7, 0.5); // warm orange
-      const dayColor = new THREE.Color();
-      dayColor.setHSL(0.6, 0.3, 0.7); // light blue
-      skyColor = sunriseColor.lerp(dayColor, mix);
-    }
-    renderer.setClearColor(skyColor);
-
+    material.uniforms.u_time.value = time * 0.001; // convert to seconds
     renderer.render(scene, camera);
-  };
-
+  }
   animate();
 }
 

@@ -29,8 +29,8 @@ export function initThreeScene() {
 
     const geometry = new THREE.PlaneGeometry(40, 40, 100, 100);
     const material = new THREE.MeshStandardMaterial({
-        color: new THREE.Color('lightblue'), // Peaceful base color
-        emissive: new THREE.Color('darkblue').multiplyScalar(0.1), // Subtle emissive glow
+        color: new THREE.Color('lightblue'),
+        emissive: new THREE.Color('darkblue').multiplyScalar(0.1),
         side: THREE.DoubleSide,
         roughness: 0.7,
         metalness: 0.2
@@ -39,7 +39,6 @@ export function initThreeScene() {
     waveMesh.rotation.x = -Math.PI / 2;
     scene.add(waveMesh);
 
-    // Improved lighting for MeshStandardMaterial
     const hemiLight = new THREE.HemisphereLight( 0xbbbbff, 0x888822, 1 );
     scene.add( hemiLight );
 
@@ -68,11 +67,17 @@ export function initThreeScene() {
             z += waveAmplitude * Math.sin(waveFrequency * x + timeSlow);
             z += waveAmplitude * Math.cos(waveFrequency * y + timeSlow);
 
-            // Layer 2 - Higher frequency, lower amplitude for fractal detail
+            // Layer 2
             waveAmplitude *= 0.5;
             waveFrequency *= 2;
             z += waveAmplitude * Math.sin(waveFrequency * x + timeSlow * 0.5);
             z += waveAmplitude * Math.cos(waveFrequency * y + timeSlow * 0.5);
+
+
+            if (isNaN(z)) {
+                z = 0; // Reset z to 0 if NaN is encountered
+                console.error("NaN detected in wave calculation, resetting z to 0");
+            }
 
 
             geometry.attributes.position.setZ(i, z);
@@ -81,16 +86,15 @@ export function initThreeScene() {
         geometry.attributes.position.needsUpdate = true;
 
 
-        // Color modulation based on Z position and time
         waveMesh.material.color.setHSL(
-            (maxZ * 0.02 + time * 0.02) % 0.5, // Hue cycle - less than 0.5 for blue/green peaceful mood
-            0.6, // Saturation - slightly increased
-            0.7  // Lightness - slightly increased
+            (maxZ * 0.02 + time * 0.02) % 0.5,
+            0.6,
+            0.7
         );
         waveMesh.material.emissive.setHSL(
-            (maxZ * 0.03 + time * 0.01) % 0.5, // Hue cycle for emissive - same hue range
-            0.4, // Saturation - reduced for subtle emissive
-            0.05  // Lightness - very dark emissive
+            (maxZ * 0.03 + time * 0.01) % 0.5,
+            0.4,
+            0.05
         );
 
 

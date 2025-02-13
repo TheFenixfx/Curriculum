@@ -7,12 +7,18 @@ export function initThreeScene() {
         return;
     }
 
+    // Center the canvas
+    canvas.style.position = 'absolute';
+    canvas.style.top = '50%';
+    canvas.style.left = '50%';
+    canvas.style.transform = 'translate(-50%, -50%)';
+
     const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
     renderer.setClearColor(0x000000);
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 10;
+    camera.position.z = 100; // Adjusted camera position
 
     function resizeRendererToDisplaySize(renderer) {
         const canvas = renderer.domElement;
@@ -27,13 +33,15 @@ export function initThreeScene() {
         return needResize;
     }
 
-    const geometry = new THREE.PlaneGeometry(40, 40, 100, 100);
+    const geometry = new THREE.PlaneGeometry(400, 400, 100, 100); // увеличен geometry size
     const material = new THREE.MeshStandardMaterial({
         color: new THREE.Color('lightblue'),
         emissive: new THREE.Color('darkblue').multiplyScalar(0.1),
         side: THREE.DoubleSide,
         roughness: 0.7,
-        metalness: 0.2
+        metalness: 0.2,
+        transparent: false,
+        opacity: 1.0
     });
     const waveMesh = new THREE.Mesh(geometry, material);
     waveMesh.rotation.x = -Math.PI / 2;
@@ -52,10 +60,19 @@ export function initThreeScene() {
         }
 
         const time = performance.now() * 0.001;
-        let waveAmplitude = 1.0;
-        let waveFrequency = 0.3;
-        let waveSpeed = 0.7;
-        const timeSlow = time * 0.7;
+        // Peaceful color gradient
+        const baseColor = new THREE.Color(0.6, 0.8, 0.8); // Soft blue-green
+        const timeOffset = time * 0.2; // Offset for color animation
+        const colorVariation = 0.1 * (Math.sin(timeOffset) + 1); // Gentle color variation
+
+        waveMesh.material.color.lerp(new THREE.Color(baseColor.r + colorVariation, baseColor.g, baseColor.b + colorVariation), 0.1);
+        waveMesh.material.emissive.lerp(new THREE.Color(0, 0.1 * colorVariation, 0.1 * colorVariation), 0.1);
+
+
+        let waveAmplitude = 0.5; // Reduced wave amplitude for subtle waves
+        let waveFrequency = 0.2; // Slightly increased frequency
+        let waveSpeed = 0.5; // Reduced wave speed for slower animation
+        const timeSlow = time * 0.5; // Slower time multiplier
         let maxZ = 0;
 
         for (let i = 0; i < geometry.attributes.position.count; i++) {
@@ -84,18 +101,6 @@ export function initThreeScene() {
             maxZ = Math.max(maxZ, Math.abs(z));
         }
         geometry.attributes.position.needsUpdate = true;
-
-
-        waveMesh.material.color.setHSL(
-            (maxZ * 0.02 + time * 0.02) % 0.5,
-            0.6,
-            0.7
-        );
-        waveMesh.material.emissive.setHSL(
-            (maxZ * 0.03 + time * 0.01) % 0.5,
-            0.4,
-            0.05
-        );
 
 
         renderer.render(scene, camera);

@@ -7,18 +7,12 @@ export function initThreeScene() {
         return;
     }
 
-    // Center the canvas
-    canvas.style.position = 'absolute';
-    canvas.style.top = '50%';
-    canvas.style.left = '50%';
-    canvas.style.transform = 'translate(-50%, -50%)';
-
     const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
     renderer.setClearColor(0x000000);
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 100; // Adjusted camera position
+    camera.position.z = 10;
 
     function resizeRendererToDisplaySize(renderer) {
         const canvas = renderer.domElement;
@@ -33,20 +27,19 @@ export function initThreeScene() {
         return needResize;
     }
 
-    const geometry = new THREE.PlaneGeometry(400, 400, 100, 100); // увеличен geometry size
+    const geometry = new THREE.PlaneGeometry(40, 40, 100, 100);
     const material = new THREE.MeshStandardMaterial({
-        color: new THREE.Color('lightblue'),
-        emissive: new THREE.Color('darkblue').multiplyScalar(0.1),
+        color: new THREE.Color('lightblue'), // Peaceful base color
+        emissive: new THREE.Color('darkblue').multiplyScalar(0.1), // Subtle emissive glow
         side: THREE.DoubleSide,
         roughness: 0.7,
-        metalness: 0.2,
-        transparent: false,
-        opacity: 1.0
+        metalness: 0.2
     });
     const waveMesh = new THREE.Mesh(geometry, material);
     waveMesh.rotation.x = -Math.PI / 2;
     scene.add(waveMesh);
 
+    // Improved lighting for MeshStandardMaterial
     const hemiLight = new THREE.HemisphereLight( 0xbbbbff, 0x888822, 1 );
     scene.add( hemiLight );
 
@@ -60,19 +53,10 @@ export function initThreeScene() {
         }
 
         const time = performance.now() * 0.001;
-        // Peaceful color gradient
-        const baseColor = new THREE.Color(0.6, 0.8, 0.8); // Soft blue-green
-        const timeOffset = time * 0.2; // Offset for color animation
-        const colorVariation = 0.1 * (Math.sin(timeOffset) + 1); // Gentle color variation
-
-        waveMesh.material.color.lerp(new THREE.Color(baseColor.r + colorVariation, baseColor.g, baseColor.b + colorVariation), 0.1);
-        waveMesh.material.emissive.lerp(new THREE.Color(0, 0.1 * colorVariation, 0.1 * colorVariation), 0.1);
-
-
-        let waveAmplitude = 0.5; // Reduced wave amplitude for subtle waves
-        let waveFrequency = 0.2; // Slightly increased frequency
-        let waveSpeed = 0.5; // Reduced wave speed for slower animation
-        const timeSlow = time * 0.5; // Slower time multiplier
+        let waveAmplitude = 1.0;
+        let waveFrequency = 0.3;
+        let waveSpeed = 0.7;
+        const timeSlow = time * 0.7;
         let maxZ = 0;
 
         for (let i = 0; i < geometry.attributes.position.count; i++) {
@@ -84,23 +68,30 @@ export function initThreeScene() {
             z += waveAmplitude * Math.sin(waveFrequency * x + timeSlow);
             z += waveAmplitude * Math.cos(waveFrequency * y + timeSlow);
 
-            // Layer 2
+            // Layer 2 - Higher frequency, lower amplitude for fractal detail
             waveAmplitude *= 0.5;
             waveFrequency *= 2;
             z += waveAmplitude * Math.sin(waveFrequency * x + timeSlow * 0.5);
             z += waveAmplitude * Math.cos(waveFrequency * y + timeSlow * 0.5);
 
 
-            if (isNaN(z)) {
-                z = 0; // Reset z to 0 if NaN is encountered
-                console.error("NaN detected in wave calculation, resetting z to 0");
-            }
-
-
             geometry.attributes.position.setZ(i, z);
             maxZ = Math.max(maxZ, Math.abs(z));
         }
         geometry.attributes.position.needsUpdate = true;
+
+
+        // Color modulation based on Z position and time
+        waveMesh.material.color.setHSL(
+            (maxZ * 0.02 + time * 0.02) % 0.5, // Hue cycle - less than 0.5 for blue/green peaceful mood
+            0.6, // Saturation - slightly increased
+            0.7  // Lightness - slightly increased
+        );
+        waveMesh.material.emissive.setHSL(
+            (maxZ * 0.03 + time * 0.01) % 0.5, // Hue cycle for emissive - same hue range
+            0.4, // Saturation - reduced for subtle emissive
+            0.05  // Lightness - very dark emissive
+        );
 
 
         renderer.render(scene, camera);

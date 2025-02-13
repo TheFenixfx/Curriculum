@@ -7,33 +7,33 @@ export function initThreeScene() {
     console.error("Canvas element with id 'background-effect' not found!");
     return;
   }
-  // Ensure the canvas takes the full window.
+  // Ensure the canvas occupies the entire screen.
   canvas.style.width = '100%';
   canvas.style.height = '100%';
   canvas.style.display = 'block';
   canvas.style.margin = '0';
   canvas.style.padding = '0';
 
-  // Create a WebGLRenderer.
+  // Create the renderer.
   const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
 
-  // Create an empty scene.
+  // Create a scene.
   const scene = new THREE.Scene();
 
   // Use an OrthographicCamera for our full-screen quad.
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
-  // Create a plane geometry that covers the full screen.
+  // Full-screen quad geometry.
   const geometry = new THREE.PlaneGeometry(2, 2);
 
-  // Create a ShaderMaterial using the adapted starfield code.
+  // Create the ShaderMaterial.
   const material = new THREE.ShaderMaterial({
     uniforms: {
       u_time: { value: 0.0 },
       u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
-      u_mouse: { value: new THREE.Vector2(0.0, 0.0) } // optional mouse input
+      u_mouse: { value: new THREE.Vector2(0.0, 0.0) }
     },
     vertexShader: `
       void main() {
@@ -47,108 +47,135 @@ export function initThreeScene() {
       uniform vec2 u_resolution;
       uniform vec2 u_mouse;
       
-      #define NUM_LAYERS 4.
+      // Global time variable (modified in the raymarch loop)
+      float gTime = 0.0;
+      const float REPEAT = 5.0;
       
       // Rotation matrix.
-      mat2 Rot(float a) {
-          float s = sin(a), c = cos(a);
-          return mat2(c, -s, s, c);
+      mat2 rot(float a) {
+        float c = cos(a), s = sin(a);
+        return mat2(c, s, -s, c);
       }
       
-      // Star function creates a bright point with flare.
-      float Star(vec2 uv, float flare) {
-          float d = length(uv);
-          float m = 0.05 / d;
-          
-          float rays = max(0.0, 1.0 - abs(uv.x * uv.y * 1000.0));
-          m += rays * flare;
-          uv *= Rot(3.1415 / 4.0);
-          rays = max(0.0, 1.0 - abs(uv.x * uv.y * 1000.0));
-          m += rays * 0.3 * flare;
-          
-          m *= smoothstep(1.0, 0.2, d);
-          return m;
+      // Signed distance function for a box.
+      float sdBox(vec3 p, vec3 b) {
+        vec3 q = abs(p) - b;
+        return length(max(q, 0.0)) + min(max(q.x, max(q.y, q.z)), 0.0);
       }
       
-      // Simple hash function.
-      float Hash21(vec2 p) {
-          p = fract(p * vec2(123.34, 456.21));
-          p += dot(p, p + 45.32);
-          return fract(p.x * p.y);
+      // Function defining a single box shape.
+      float box(vec3 pos, float scale) {
+        pos *= scale;
+        float base = sdBox(pos, vec3(0.4, 0.4, 0.1)) / 1.5;
+        pos.xy *= 5.0;
+        pos.y -= 3.5;
+        pos.xy *= rot(0.75);
+        float result = -base;
+        return result;
       }
       
-      // Computes a star layer from UV coordinates.
-      vec3 StarLayer(vec2 uv) {
-          vec3 col = vec3(0.0);
-          vec2 gv = fract(uv) - 0.5;
-          vec2 id = floor(uv);
-          
-          for (int y = -1; y <= 1; y++) {
-              for (int x = -1; x <= 1; x++) {
-                  vec2 offs = vec2(float(x), float(y));
-                  float n = Hash21(id + offs); // random number between 0 and 1
-                  float size = fract(n * 345.32);
-                  
-                  float star = Star(gv - offs - vec2(n, fract(n * 34.0)) + 0.5,
-                                     smoothstep(0.9, 1.0, size) * 0.6);
-                  
-                  vec3 color = sin(vec3(0.2, 0.3, 0.9) * fract(n * 2345.2) * 123.2) * 0.5 + 0.5;
-                  color = color * vec3(1.0, 0.25, 1.0 + size) + vec3(0.2, 0.2, 0.1) * 2.0;
-                  
-                  star *= sin(u_time * 3.0 + n * 6.2831) * 0.5 + 1.0;
-                  col += star * size * color;
-              }
-          }
-          return col;
+      // Constructs a set of boxes with time-varying offsets.
+      float box_set(vec3 pos, float timeVal) {
+        vec3 pos_origin = pos;
+        pos = pos_origin;
+        pos.y += sin(gTime * 0.4) * 2.5;
+        pos.xy *= rot(0.8);
+        float box1 = box(pos, 2.0 - abs(sin(gTime * 0.4)) * 1.5);
+        
+        pos = pos_origin;
+        pos.y -= sin(gTime * 0.4) * 2.5;
+        pos.xy *= rot(0.8);
+        float box2 = box(pos, 2.0 - abs(sin(gTime * 0.4)) * 1.5);
+        
+        pos = pos_origin;
+        pos.x += sin(gTime * 0.4) * 2.5;
+        pos.xy *= rot(0.8);
+        float box3 = box(pos, 2.0 - abs(sin(gTime * 0.4)) * 1.5);
+        
+        pos = pos_origin;
+        pos.x -= sin(gTime * 0.4) * 2.5;
+        pos.xy *= rot(0.8);
+        float box4 = box(pos, 2.0 - abs(sin(gTime * 0.4)) * 1.5);
+        
+        pos = pos_origin;
+        pos.xy *= rot(0.8);
+        float box5 = box(pos, 0.5) * 6.0;
+        
+        pos = pos_origin;
+        float box6 = box(pos, 0.5) * 6.0;
+        
+        float result = max(max(max(max(max(box1, box2), box3), box4), box5), box6);
+        return result;
       }
       
-      // Main image function (adapted from Shadertoy's mainImage).
+      // Scene SDF.
+      float map(vec3 pos, float timeVal) {
+        return box_set(pos, timeVal);
+      }
+      
+      // Main raymarching function.
       void mainImage(out vec4 fragColor, in vec2 fragCoord) {
-          // Normalize pixel coordinates.
-          vec2 uv = (fragCoord - 0.5 * u_resolution.xy) / u_resolution.y;
-          // Adjust for mouse input.
-          vec2 M = (u_mouse - 0.5 * u_resolution.xy) / u_resolution.y;
+        // Normalize coordinates to range [-1,1]
+        vec2 p = (fragCoord.xy * 2.0 - u_resolution.xy) / min(u_resolution.x, u_resolution.y);
+        // Define the ray origin with time-based z-motion.
+        vec3 ro = vec3(0.0, -0.2, u_time * 4.0);
+        
+        // Incorporate mouse input as an offset.
+        vec2 m = (u_mouse / u_resolution) - 0.5;
+        ro.x += m.x * 2.0;
+        ro.y += m.y * 2.0;
+        
+        // Create the ray direction.
+        vec3 ray = normalize(vec3(p, 1.5));
+        ray.xy = ray.xy * rot(sin(u_time * 0.03) * 5.0);
+        ray.yz = ray.yz * rot(sin(u_time * 0.05) * 0.2);
+        
+        float t = 0.1;
+        vec3 col = vec3(0.0);
+        float ac = 0.0;
+        
+        // Raymarch loop.
+        for (int i = 0; i < 99; i++){
+          vec3 pos = ro + ray * t;
+          pos = mod(pos - 2.0, 4.0) - 2.0;
+          gTime = u_time - float(i) * 0.01;
           
-          float t = u_time * 0.02;
-          uv += M * 4.0;
-          uv *= Rot(t);
-          
-          vec3 col = vec3(0.0);
-          for (float i = 0.0; i < 1.0; i += 1.0 / NUM_LAYERS) {
-              float depth = fract(i + t);
-              float scale = mix(20.0, 0.5, depth);
-              float fade = depth * smoothstep(1.0, 0.9, depth);
-              col += StarLayer(uv * scale + i * 453.2 - M) * fade;
-          }
-          col = pow(col, vec3(0.4545)); // gamma correction
-          fragColor = vec4(col, 1.0);
+          float d = map(pos, u_time);
+          d = max(abs(d), 0.01);
+          ac += exp(-d * 23.0);
+          t += d * 0.55;
+        }
+        
+        col = vec3(ac * 0.02);
+        col += vec3(0.0, 0.2 * abs(sin(u_time)), 0.5 + sin(u_time) * 0.2);
+        
+        fragColor = vec4(col, 1.0 - t * (0.02 + 0.02 * sin(u_time)));
       }
       
       void main() {
-          mainImage(gl_FragColor, gl_FragCoord.xy);
+        mainImage(gl_FragColor, gl_FragCoord.xy);
       }
     `
   });
-
-  // Create the full-screen quad and add it to the scene.
+  
+  // Create the full-screen quad mesh.
   const quad = new THREE.Mesh(geometry, material);
   scene.add(quad);
-
-  // Handle window resize.
+  
+  // Update resolution uniform on window resize.
   function onWindowResize() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     material.uniforms.u_resolution.value.set(window.innerWidth, window.innerHeight);
   }
   window.addEventListener('resize', onWindowResize);
-
-  // Optionally update the u_mouse uniform on mouse move.
-  window.addEventListener('mousemove', (e) => {
-    material.uniforms.u_mouse.value.x = e.clientX;
-    // Flip y-coordinate to match WebGL coordinates.
-    material.uniforms.u_mouse.value.y = window.innerHeight - e.clientY;
+  
+  // Update the mouse uniform on mouse move.
+  window.addEventListener('mousemove', (event) => {
+    material.uniforms.u_mouse.value.x = event.clientX;
+    material.uniforms.u_mouse.value.y = window.innerHeight - event.clientY;
   });
-
-  // Animation loop: update time uniform and render.
+  
+  // Animation loop.
   function animate(time) {
     requestAnimationFrame(animate);
     material.uniforms.u_time.value = time * 0.001; // Convert to seconds.

@@ -7,14 +7,14 @@ export function initThreeScene() {
     console.error("Canvas element with id 'background-effect' not found!");
     return;
   }
-  // Set CSS to fill the entire window.
+  // Make sure the canvas fills the screen.
   canvas.style.width = '100%';
   canvas.style.height = '100%';
   canvas.style.display = 'block';
   canvas.style.margin = '0';
   canvas.style.padding = '0';
 
-  // Create the renderer.
+  // Create the WebGLRenderer.
   const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -22,13 +22,13 @@ export function initThreeScene() {
   // Create an empty scene.
   const scene = new THREE.Scene();
 
-  // Use an OrthographicCamera so our full-screen quad covers the viewport.
+  // Use an OrthographicCamera to render a full-screen quad.
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
   // Create a plane geometry that spans the entire screen.
   const geometry = new THREE.PlaneGeometry(2, 2);
 
-  // The ShaderMaterial contains our custom vertex and fragment shaders.
+  // Create a custom ShaderMaterial.
   const material = new THREE.ShaderMaterial({
     uniforms: {
       u_time: { value: 0.0 },
@@ -41,46 +41,53 @@ export function initThreeScene() {
     `,
     fragmentShader: `
       precision highp float;
+
       uniform float u_time;
       uniform vec2 u_resolution;
       
-      // Kaleidoscopic transform: mirror the input into N symmetric sectors.
-      vec2 kaleido(vec2 uv, float sectors) {
-        float angle = atan(uv.y, uv.x);
-        float radius = length(uv);
-        float sectorAngle = 2.0 * 3.14159265 / sectors;
-        angle = mod(angle, sectorAngle);
-        angle = abs(angle - sectorAngle * 0.5);
-        return vec2(radius * cos(angle), radius * sin(angle));
+      // A simple hash function to generate pseudo-random numbers from a 2D input.
+      float hash(vec2 p) {
+        p = fract(p * vec2(123.34, 456.21));
+        p += dot(p, p + 34.345);
+        return fract(p.x * p.y);
+      }
+      
+      // Function that computes the star contribution in a given grid cell.
+      float starField(vec2 uv) {
+        // Get grid cell coordinates and local position.
+        vec2 id = floor(uv);
+        vec2 fuv = fract(uv) - 0.5;
+        
+        // Random value for the current cell.
+        float n = hash(id);
+        // Use the random value to define a star's offset within the cell.
+        vec2 starOffset = vec2(sin(n * 6.2831), cos(n * 6.2831)) * 0.35;
+        // Add a slight time-based shift for twinkling.
+        starOffset += 0.1 * vec2(sin(u_time + n * 6.2831), cos(u_time + n * 6.2831));
+        
+        // Compute distance from the "star" center.
+        float d = length(fuv - starOffset);
+        // Return a star value that is strong when close to the center.
+        return 1.0 - smoothstep(0.0, 0.15, d);
       }
       
       void main() {
-        // Normalize coordinates: center at (0,0) with aspect ratio preserved.
-        vec2 uv = (gl_FragCoord.xy - 0.5 * u_resolution.xy) / u_resolution.y;
-        // Apply a kaleidoscopic transform with 8 sectors.
-        uv = kaleido(uv, 8.0);
+        // Normalize pixel coordinates.
+        vec2 uv = gl_FragCoord.xy / u_resolution.xy;
+        // Scale UV for starfield density (increase factor for a denser starfield).
+        uv *= 20.0;
+        // Animate vertical movement to simulate drifting through space.
+        uv.y += u_time * 0.2;
         
-        // Create a fractal by iterating a Mandelbrot-like function.
-        // The fractal is animated by a time-based offset.
-        vec2 c = uv * 1.5 + vec2(sin(u_time * 0.3), cos(u_time * 0.2));
-        vec2 z = vec2(0.0);
-        float iter = 0.0;
-        const float maxIter = 100.0;
-        for (int i = 0; i < 100; i++) {
-          if (dot(z, z) > 4.0) break;
-          z = vec2(z.x * z.x - z.y * z.y, 2.0 * z.x * z.y) + c;
-          iter += 1.0;
-        }
-        float t = iter / maxIter;
+        // Accumulate star brightness from multiple scales for variety.
+        float starIntensity = 0.0;
+        starIntensity += starField(uv);
+        starIntensity += 0.5 * starField(uv * 2.0);
+        starIntensity += 0.25 * starField(uv * 4.0);
         
-        // Generate a soothing, shifting color based on the fractal iteration.
-        vec3 color = vec3(
-          0.5 + 0.5 * sin(3.14159 * t + u_time),
-          0.5 + 0.5 * sin(3.14159 * t + u_time + 2.0),
-          0.5 + 0.5 * sin(3.14159 * t + u_time + 4.0)
-        );
-        // Quantize the color to emulate stained-glass segments.
-        color = floor(color * 8.0) / 8.0;
+        // Clamp brightness and mix with a deep night background.
+        float brightness = clamp(starIntensity, 0.0, 1.0);
+        vec3 color = mix(vec3(0.0, 0.0, 0.05), vec3(1.0), brightness);
         
         gl_FragColor = vec4(color, 1.0);
       }
@@ -91,17 +98,17 @@ export function initThreeScene() {
   const quad = new THREE.Mesh(geometry, material);
   scene.add(quad);
 
-  // Update renderer and shader uniforms on window resize.
+  // Handle window resize.
   function onWindowResize() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     material.uniforms.u_resolution.value.set(window.innerWidth, window.innerHeight);
   }
   window.addEventListener('resize', onWindowResize);
 
-  // Animation loop: update time uniform and render.
+  // Animation loop: update time uniform and render the scene.
   function animate(time) {
     requestAnimationFrame(animate);
-    material.uniforms.u_time.value = time * 0.001; // convert time to seconds
+    material.uniforms.u_time.value = time * 0.001; // Convert time to seconds.
     renderer.render(scene, camera);
   }
   animate();

@@ -1,39 +1,40 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.module.min.js';
 
 export function initThreeScene() {
-  // Get the canvas element and ensure it fills the viewport.
+  // Get and style the canvas to fill the entire viewport.
   const canvas = document.getElementById('background-effect');
   if (!canvas) {
     console.error("Canvas element with id 'background-effect' not found!");
     return;
   }
-  // Ensure the canvas occupies the entire screen.
   canvas.style.width = '100%';
   canvas.style.height = '100%';
   canvas.style.display = 'block';
   canvas.style.margin = '0';
   canvas.style.padding = '0';
 
-  // Create the renderer.
-  const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+  // Create renderer.
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
 
-  // Create a scene.
+  // Create scene.
   const scene = new THREE.Scene();
 
-  // Use an OrthographicCamera for our full-screen quad.
+  // Use an orthographic camera to cover the full screen.
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
   // Full-screen quad geometry.
   const geometry = new THREE.PlaneGeometry(2, 2);
 
-  // Create the ShaderMaterial.
+  // Create a ShaderMaterial. In the shader, we replace Shadertoy’s iTime, iResolution,
+  // and iMouse with uniforms u_time, u_resolution, and u_mouse.
   const material = new THREE.ShaderMaterial({
     uniforms: {
       u_time: { value: 0.0 },
       u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
-      u_mouse: { value: new THREE.Vector2(0.0, 0.0) }
+      // Using a vec3 for mouse: x and y are coordinates, z is used to enable the mouse effect.
+      u_mouse: { value: new THREE.Vector3(0.0, 0.0, 0.0) }
     },
     vertexShader: `
       void main() {
@@ -45,140 +46,272 @@ export function initThreeScene() {
       
       uniform float u_time;
       uniform vec2 u_resolution;
-      uniform vec2 u_mouse;
+      uniform vec3 u_mouse;
       
-      // Global time variable (modified in the raymarch loop)
-      float gTime = 0.0;
-      const float REPEAT = 5.0;
+      #define iterations 15.0
+      #define depth 0.0125
+      #define layers 8.0
+      #define layersblob 20
+      #define step 1.0
+      #define far 10000.0
       
-      // Rotation matrix.
-      mat2 rot(float a) {
-        float c = cos(a), s = sin(a);
-        return mat2(c, s, -s, c);
+      float radius = 0.25; // radius of Snowflakes. Maximum for this demo: 0.25.
+      float zoom = 4.0;    // Use this to change details. Optimal values: 0.1 - 4.0.
+      
+      vec3 light = vec3(0.0, 0.0, 1.0);
+      vec2 seed = vec2(0.0, 0.0);
+      float iteratorc = iterations;
+      float powr;
+      float res;
+      
+      vec4 NC0 = vec4(0.0,157.0,113.0,270.0);
+      vec4 NC1 = vec4(1.0,158.0,114.0,271.0);
+      
+      lowp vec4 hash4(mediump vec4 n) { 
+        return fract(sin(n) * 1399763.5453123); 
       }
       
-      // Signed distance function for a box.
-      float sdBox(vec3 p, vec3 b) {
-        vec3 q = abs(p) - b;
-        return length(max(q, 0.0)) + min(max(q.x, max(q.y, q.z)), 0.0);
+      lowp float noise2(mediump vec2 x) {
+          vec2 p = floor(x);
+          lowp vec2 f = fract(x);
+          f = f * f * (3.0 - 2.0 * f);
+          float n = p.x + p.y * 157.0;
+          lowp vec4 h = hash4(vec4(n) + vec4(NC0.xy, NC1.xy));
+          lowp vec2 s1 = mix(h.xy, h.zw, f.xx);
+          return mix(s1.x, s1.y, f.y);
       }
       
-      // Function defining a single box shape.
-      float box(vec3 pos, float scale) {
-        pos *= scale;
-        float base = sdBox(pos, vec3(0.4, 0.4, 0.1)) / 1.5;
-        pos.xy *= 5.0;
-        pos.y -= 3.5;
-        pos.xy *= rot(0.75);
-        float result = -base;
-        return result;
+      lowp float noise222(mediump vec2 x, mediump vec2 y, mediump vec2 z) {
+          mediump vec4 lx = vec4(x * y.x, x * y.y);
+          mediump vec4 p = floor(lx);
+          lowp vec4 f = fract(lx);
+          f = f * f * (3.0 - 2.0 * f);
+          mediump vec2 n = p.xz + p.yw * 157.0;
+          lowp vec4 h = mix(hash4(n.xxyy + NC0.xyxy), hash4(n.xxyy + NC1.xyxy), f.xxzz);
+          return dot(mix(h.xz, h.yw, f.yw), z);
       }
       
-      // Constructs a set of boxes with time-varying offsets.
-      float box_set(vec3 pos, float timeVal) {
-        vec3 pos_origin = pos;
-        pos = pos_origin;
-        pos.y += sin(gTime * 0.4) * 2.5;
-        pos.xy *= rot(0.8);
-        float box1 = box(pos, 2.0 - abs(sin(gTime * 0.4)) * 1.5);
-        
-        pos = pos_origin;
-        pos.y -= sin(gTime * 0.4) * 2.5;
-        pos.xy *= rot(0.8);
-        float box2 = box(pos, 2.0 - abs(sin(gTime * 0.4)) * 1.5);
-        
-        pos = pos_origin;
-        pos.x += sin(gTime * 0.4) * 2.5;
-        pos.xy *= rot(0.8);
-        float box3 = box(pos, 2.0 - abs(sin(gTime * 0.4)) * 1.5);
-        
-        pos = pos_origin;
-        pos.x -= sin(gTime * 0.4) * 2.5;
-        pos.xy *= rot(0.8);
-        float box4 = box(pos, 2.0 - abs(sin(gTime * 0.4)) * 1.5);
-        
-        pos = pos_origin;
-        pos.xy *= rot(0.8);
-        float box5 = box(pos, 0.5) * 6.0;
-        
-        pos = pos_origin;
-        float box6 = box(pos, 0.5) * 6.0;
-        
-        float result = max(max(max(max(max(box1, box2), box3), box4), box5), box6);
-        return result;
+      lowp float noise3(mediump vec3 x) {
+          mediump vec3 p = floor(x);
+          lowp vec3 f = fract(x);
+          f = f * f * (3.0 - 2.0 * f);
+          mediump float n = p.x + dot(p.yz, vec2(157.0,113.0));
+          lowp vec4 s1 = mix(hash4(vec4(n) + NC0), hash4(vec4(n) + NC1), f.xxxx);
+          return mix(mix(s1.x, s1.y, f.y), mix(s1.z, s1.w, f.y), f.z);
       }
       
-      // Scene SDF.
-      float map(vec3 pos, float timeVal) {
-        return box_set(pos, timeVal);
+      lowp vec2 noise3_2(mediump vec3 x) { 
+        return vec2(noise3(x), noise3(x + 100.0)); 
       }
       
-      // Main raymarching function.
-      void mainImage(out vec4 fragColor, in vec2 fragCoord) {
-        // Normalize coordinates to range [-1,1]
-        vec2 p = (fragCoord.xy * 2.0 - u_resolution.xy) / min(u_resolution.x, u_resolution.y);
-        // Define the ray origin with time-based z-motion.
-        vec3 ro = vec3(0.0, -0.2, u_time * 4.0);
-        
-        // Incorporate mouse input as an offset.
-        vec2 m = (u_mouse / u_resolution) - 0.5;
-        ro.x += m.x * 2.0;
-        ro.y += m.y * 2.0;
-        
-        // Create the ray direction.
-        vec3 ray = normalize(vec3(p, 1.5));
-        ray.xy = ray.xy * rot(sin(u_time * 0.03) * 5.0);
-        ray.yz = ray.yz * rot(sin(u_time * 0.05) * 0.2);
-        
-        float t = 0.1;
-        vec3 col = vec3(0.0);
-        float ac = 0.0;
-        
-        // Raymarch loop.
-        for (int i = 0; i < 99; i++){
-          vec3 pos = ro + ray * t;
-          pos = mod(pos - 2.0, 4.0) - 2.0;
-          gTime = u_time - float(i) * 0.01;
+      float map(mediump vec2 rad) {
+          float a;
+          if (res < 0.0015) {
+              a = noise222(rad.xy, vec2(20.6,100.6), vec2(0.9,0.1));
+          } else if (res < 0.005) {
+              a = noise2(rad.xy * 20.6);
+          } else {
+              a = noise2(rad.xy * 10.3);
+          }
+          return (a - 0.5);
+      }
+      
+      vec3 distObj(vec3 pos, vec3 ray, float r, vec2 seed) {   
+          mediump float rq = r * r;
+          mediump vec3 dist = ray * far;
           
-          float d = map(pos, u_time);
-          d = max(abs(d), 0.01);
-          ac += exp(-d * 23.0);
-          t += d * 0.55;
-        }
-        
-        col = vec3(ac * 0.02);
-        col += vec3(0.0, 0.2 * abs(sin(u_time)), 0.5 + sin(u_time) * 0.2);
-        
-        fragColor = vec4(col, 1.0 - t * (0.02 + 0.02 * sin(u_time)));
+          mediump vec3 norm = vec3(0.0, 0.0, 1.0);
+          mediump float invn = 1.0 / dot(norm, ray);
+          mediump float depthi = depth;
+          if (invn < 0.0) depthi = -depthi;
+          mediump float ds = 2.0 * depthi * invn;
+          mediump vec3 r1 = ray * (dot(norm, pos) - depthi) * invn - pos;
+          mediump vec3 op1 = r1 + norm * depthi;
+          mediump float len1 = dot(op1, op1);
+          mediump vec3 r2 = r1 + ray * ds;
+          mediump vec3 op2 = r2 - norm * depthi;
+          mediump float len2 = dot(op2, op2);
+          
+          mediump vec3 n = normalize(cross(ray, norm));
+          mediump float mind = dot(pos, n);
+          mediump vec3 n2 = cross(ray, n);
+          mediump float d = dot(n2, pos) / dot(n2, norm);
+          mediump float invd = 0.2 / depth;
+          
+          if ((len1 < rq || len2 < rq) || (abs(mind) < r && d <= depth && d >= -depth)) {        
+              mediump vec3 r3 = r2;
+              mediump float len = len1;
+              if (len >= rq) {
+                  mediump vec3 n3 = cross(norm, n);
+                  mediump float a = inversesqrt(rq - mind * mind) * abs(dot(ray, n3));
+                  mediump vec3 dt = ray / a;
+                  r1 = -d * norm - mind * n - dt;
+                  if (len2 >= rq) {
+                      r2 = -d * norm - mind * n + dt;
+                  }
+                  ds = dot(r2 - r1, ray);
+              }
+              ds = (abs(ds) + 0.1) / (iterations);
+              ds = mix(depth, ds, 0.2);
+              if (ds > 0.01) ds = 0.01;
+              mediump float ir = 0.35 / r;
+              r *= zoom;
+              ray = ray * ds * 5.0;
+              for (float m = 0.0; m < iterations; m += 1.0) {
+                  if (m >= iteratorc) break;
+                  mediump float l = length(r1.xy);
+                  lowp vec2 c3 = abs(r1.xy / l);
+                  if (c3.x > 0.5) c3 = abs(c3 * 0.5 + vec2(-c3.y, c3.x) * 0.86602540);
+                  mediump float g = l + c3.x * c3.x;
+                  l *= zoom;
+                  mediump float h = l - r - 0.1;
+                  l = pow(l, powr) + 0.1;
+                  h = max(h, mix(map(c3 * l + seed), 1.0, abs(r1.z * invd))) + g * ir - 0.245;
+                  if ((h < res * 20.0) || abs(r1.z) > depth + 0.01) break;
+                  r1 += ray * h;
+                  ray *= 0.99;
+              }
+              if (abs(r1.z) < depth + 0.01) dist = r1 + pos;
+          }
+          return dist;
+      }
+      
+      vec3 nray;
+      vec3 nray1;
+      vec3 nray2;
+      float mxc = 1.0;
+      
+      vec4 filterFlake(vec4 color, vec3 pos, vec3 ray, vec3 ray1, vec3 ray2) {
+          vec3 d = distObj(pos, ray, radius, seed);
+          vec3 n1 = distObj(pos, ray1, radius, seed);
+          vec3 n2 = distObj(pos, ray2, radius, seed);
+      
+          vec3 lq = vec3(dot(d, d), dot(n1, n1), dot(n2, n2));
+          if (lq.x < far || lq.y < far || lq.z < far) {
+              vec3 n = normalize(cross(n1 - d, n2 - d));
+              if (lq.x < far && lq.y < far && lq.z < far) {
+                  nray = n;
+              }
+              float da = pow(abs(dot(n, light)), 3.0);
+              vec3 cf = mix(vec3(0.0, 0.4, 1.0), color.xyz * 10.0, abs(dot(n, ray)));
+              cf = mix(cf, vec3(2.0), da);
+              color.xyz = mix(color.xyz, cf, mxc * mxc * (0.5 + abs(dot(n, ray)) * 0.5));
+          }
+          return color;
+      }
+      
+      void mainImage(out vec4 fragColor, in vec2 fragCoord) {
+          float time = u_time * 0.2;
+          res = 1.0 / u_resolution.y;
+          vec2 p = (-u_resolution.xy + 2.0 * fragCoord.xy) * res;
+      
+          vec3 rotate;
+          mat3 mr;
+          vec3 ray = normalize(vec3(p, 2.0));
+          vec3 ray1;
+          vec3 ray2;
+          vec3 pos = vec3(0.0, 0.0, 1.0);
+      
+          fragColor = vec4(0.0);
+          nray = vec3(0.0);
+          nray1 = vec3(0.0);
+          nray2 = vec3(0.0);
+      
+          vec4 refcolor = vec4(0.0);
+          iteratorc = iterations - layers;
+      
+          vec2 addrot = vec2(0.0);
+          if (u_mouse.z > 0.0) 
+              addrot = (u_mouse.xy - u_resolution.xy * 0.5) * res;
+      
+          float mxcl = 1.0;
+          vec3 addpos = vec3(0.0);
+          pos.z = 1.0;
+          mxc = 1.0;
+          radius = 0.25;
+          float mzd = (zoom - 0.1) / layers;
+          for (int i = 0; i < layersblob; i++) {
+              vec2 p2 = p - vec2(0.25) + vec2(0.1 * float(i));
+              ray = vec3(p2, 2.0) - nray * 2.0;
+              ray1 = normalize(ray + vec3(0.0, res * 2.0, 0.0));
+              ray2 = normalize(ray + vec3(res * 2.0, 0.0, 0.0));
+              ray = normalize(ray);
+              vec2 sb = ray.xy * length(pos) / dot(normalize(pos), ray) + vec2(0.0, time);
+              seed = floor((sb + vec2(0.0, pos.z))) + pos.z;
+              vec3 seedn = vec3(seed, pos.z);
+              sb = floor(sb);
+              if (noise3(seedn) > 0.2 && i < int(layers)) {
+                  powr = noise3(seedn * 10.0) * 1.9 + 0.1;
+                  rotate.xy = sin((0.5 - noise3_2(seedn)) * time * 5.0) * 0.3 + addrot;
+                  rotate.z = (0.5 - noise3(seedn + vec3(10.0, 3.0, 1.0))) * time * 5.0;
+                  seedn.z += time * 0.5;
+                  addpos.xy = sb + vec2(0.25, 0.25 - time) + noise3_2(seedn) * 0.5;
+                  vec3 sins = sin(rotate);
+                  vec3 coss = cos(rotate);
+                  mr = mat3(vec3(coss.x, 0.0, sins.x), vec3(0.0, 1.0, 0.0), vec3(-sins.x, 0.0, coss.x));
+                  mr = mat3(vec3(1.0, 0.0, 0.0), vec3(0.0, coss.y, sins.y), vec3(0.0, -sins.y, coss.y)) * mr;
+                  mr = mat3(vec3(coss.z, sins.z, 0.0), vec3(-sins.z, coss.z, 0.0), vec3(0.0, 0.0, 1.0)) * mr;
+      
+                  light = normalize(vec3(1.0, 0.0, 1.0)) * mr;
+                  vec4 cc = filterFlake(fragColor, (pos + addpos) * mr, ray * mr, ray1 * mr, ray2 * mr);
+                  fragColor = mix(cc, fragColor, min(1.0, fragColor.w));
+              }
+              seedn = vec3(sb, pos.z) + vec3(0.5, 1000.0, 300.0);
+              if (noise3(seedn * 10.0) > 0.4) {
+                  float raf = 0.3 + noise3(seedn * 100.0);
+                  addpos.xy = sb + vec2(0.2, 0.2 - time) + noise3_2(seedn * 100.0) * 0.6;
+                  float l = length(ray * dot(ray, pos + addpos) - pos - addpos);
+                  l = max(0.0, (1.0 - l * 10.0 * raf));
+                  fragColor.xyzw += vec4(1.0, 1.2, 3.0, 1.0) * pow(l, 5.0) * (pow(0.6 + raf, 2.0) - 0.6) * mxcl;
+              }
+              mxc -= 1.1 / layers;
+              pos.z += step;
+              iteratorc += 2.0;
+              mxcl -= 1.1 / float(layersblob);
+              zoom -= mzd;
+          }
+      
+          vec3 cr = mix(vec3(0.0), vec3(0.0, 0.0, 0.4), (-0.55 + p.y) * 2.0);
+          fragColor.xyz += mix((cr.xyz - fragColor.xyz) * 0.1, vec3(0.2, 0.5, 1.0), clamp((-p.y + 1.0) * 0.5, 0.0, 1.0));
+      
+          fragColor = min(vec4(1.0), fragColor);
+          fragColor.a = 1.0;
       }
       
       void main() {
-        mainImage(gl_FragColor, gl_FragCoord.xy);
+          mainImage(gl_FragColor, gl_FragCoord.xy);
       }
     `
   });
-  
-  // Create the full-screen quad mesh.
+
   const quad = new THREE.Mesh(geometry, material);
   scene.add(quad);
-  
-  // Update resolution uniform on window resize.
+
+  // Resize handler.
   function onWindowResize() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     material.uniforms.u_resolution.value.set(window.innerWidth, window.innerHeight);
   }
   window.addEventListener('resize', onWindowResize);
-  
-  // Update the mouse uniform on mouse move.
+
+  // Update mouse uniform.
   window.addEventListener('mousemove', (event) => {
     material.uniforms.u_mouse.value.x = event.clientX;
     material.uniforms.u_mouse.value.y = window.innerHeight - event.clientY;
+    // Optionally, set z = 1.0 when the mouse is active.
+    material.uniforms.u_mouse.value.z = 1.0;
   });
-  
+  window.addEventListener('mousedown', () => {
+    material.uniforms.u_mouse.value.z = 1.0;
+  });
+  window.addEventListener('mouseup', () => {
+    material.uniforms.u_mouse.value.z = 0.0;
+  });
+
   // Animation loop.
   function animate(time) {
     requestAnimationFrame(animate);
-    material.uniforms.u_time.value = time * 0.001; // Convert to seconds.
+    material.uniforms.u_time.value = time * 0.001; // seconds
     renderer.render(scene, camera);
   }
   animate();

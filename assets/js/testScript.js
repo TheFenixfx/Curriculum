@@ -48,12 +48,12 @@ export function initThreeScene() {
       uniform vec2 u_resolution;
       uniform vec3 u_mouse;
       
-      #define iterations 15.0
+      #define iterations 7.0
       #define depth 0.0125
-      #define layers 8.0
-      #define layersblob 20
+      #define layers 4.0
+      #define layersblob 10
       #define step 1.0
-      #define far 10000.0
+      #define far 1000.0
       
       float radius = 0.25; // radius of Snowflakes. Maximum for this demo: 0.25.
       float zoom = 4.0;    // Use this to change details. Optimal values: 0.1 - 4.0.

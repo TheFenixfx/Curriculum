@@ -2869,4 +2869,5 @@ div.ppt {
     width: 100%;
     height: 100%;
     z-index: -1; /* Place effect behind other content */
+    object-fit: cover; /* Ensures video fills viewport without distortion */
 }

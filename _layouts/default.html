@@ -7,7 +7,10 @@
 {% include head.html %}
 
 <body>
-   <div id="background-effect"></div>
+   <video id="background-effect" autoplay muted loop playsinline>
+      <source src="assets/video/bg.webm" type="video/webm">
+      <source src="assets/video/bg.mp4" type="video/mp4">
+   </video>
      
       {{content}}
       <!-- </div> -->

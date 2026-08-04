@@ -68,7 +68,7 @@ h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
     position: absolute;
     top: 50%; 
     margin: -290.5px auto 0 auto;
-    background: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.70);
     border-radius: 4px;
 }
 h1 {
@@ -152,7 +152,7 @@ a:hover {
 #verticalTab {
     z-index: 1;
     height: 100%;
-    background: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.70);
 }
 l.resp-tabs-list, p {
     margin: 0;
@@ -169,7 +169,7 @@ l.resp-tabs-list, p {
 }
 .resp-tabs-container {
     padding: 0;
-    background-color: rgba(255, 255, 255, 0.85);
+    background-color: rgba(255, 255, 255, 0.70);
     clear: left;
 }
 h2.resp-accordion {
@@ -197,7 +197,7 @@ h2.resp-accordion {
 }
 .resp-tab-active {
     border-bottom: none;
-    background-color: rgba(255, 255, 255, 0.85);
+    background-color: rgba(255, 255, 255, 0.70);
 }
 .resp-content-active, .resp-accordion-active {
     display: block;
@@ -263,14 +263,14 @@ h2.resp-tab-title:last-child {
     position: relative;
     z-index: 1;
     padding: 17px !important;
-    background: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.70);
 }
 .resp-tabs-list li:hover {
     -webkit-transition: all .6s ease-in;
     -moz-transition: all .6s ease-in;
     -o-transition: all .6s ease-in;
     transition: all .6s ease-in;
-    background: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.70);
 }
 .resp-arrow {
     width: 0;
@@ -566,7 +566,7 @@ h2.resp-accordion:hover {
     background: #2f9b68;
 }
 #contact {
-    background-color: rgba(255, 255, 255, 0.85);
+    background-color: rgba(255, 255, 255, 0.70);
 }
 .resp-tabs-list li span {
     text-transform : uppercase;
@@ -1027,7 +1027,7 @@ ul.about {
 }
 
 #profile_social a:hover{
-    background-color: rgba(255, 255, 255, 0.85);
+    background-color: rgba(255, 255, 255, 0.70);
 }
 .widget-profil .image-holder{
     position: relative;
@@ -1214,7 +1214,7 @@ ul.about {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.70);
     content: attr(data-hover);
     -webkit-transform: rotateX(270deg);
     -moz-transform: rotateX(270deg);
@@ -1545,7 +1545,7 @@ a.readmore:hover, a.readmore:focus, a.readmore:active {
 }
 a.readmore.disabled {
     cursor: default;
-    background-color: rgba(255, 255, 255, 0.85)!important;
+    background-color: rgba(255, 255, 255, 0.70)!important;
     color: #999!important;
     border: 1px solid #999!important;
 }
@@ -1726,7 +1726,7 @@ ul.info-post li {
 }
 #tabs_sidebar .img-thumbnail {
     padding: 4px;
-    background-color: rgba(255, 255, 255, 0.85);
+    background-color: rgba(255, 255, 255, 0.70);
     border: 1px solid #ddd;
     border-radius: 4px;
     -webkit-transition: all .2s ease-in-out;
@@ -1748,7 +1748,7 @@ ul.info-post li {
     margin: 0;
 }
 #tags .tags_sidebar .tags-list li {
-    background: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.70);
     padding: 5px;
     float: left;
     margin-right: 5px;
@@ -1901,7 +1901,7 @@ ul.info-post li {
     line-height: 1.428571429;
     color: #555;
     vertical-align: middle;
-    background-color: rgba(255, 255, 255, 0.85);
+    background-color: rgba(255, 255, 255, 0.70);
     background-image: none;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -1921,7 +1921,7 @@ ul.info-post li {
     line-height: 1.428571429;
     color: #555;
     vertical-align: middle;
-    background-color: rgba(255, 255, 255, 0.85);
+    background-color: rgba(255, 255, 255, 0.70);
     background-image: none;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -2698,7 +2698,7 @@ li h6{
     -o-transition: all 0.5s ease 0s;
 }
 #services .pack-service:hover {
-    background: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.70);
     box-shadow: 0px 0px 0px 2px rgba(0, 0, 0, 0.05);
 }
 #services .alpha {margin: 1% 0 0 0;}

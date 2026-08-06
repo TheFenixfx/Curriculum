@@ -3,6 +3,12 @@ title: My Resume
 url: 'http://junlulocky.com'
 baseurl: '/PanelCV' #change it according to your repository name
 
+# Background renderer (set before `jekyll build`):
+#   video  -> <video> background only (safe everywhere, default)
+#   shader -> Three.js canvas effect only
+#   both   -> video + shader fused (screen blend); heaviest, needs a real GPU
+background_mode: video
+
 
 
 # Profile information

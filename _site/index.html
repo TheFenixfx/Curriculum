@@ -68,11 +68,12 @@
 
     </head>
 
-<body class="bg-mode-video">
+<body class="bg-mode-both">
    
    <video id="bg-video" autoplay muted loop playsinline>
       <source src="assets/video/bg.mp4" type="video/mp4">
    </video>
+   <canvas id="bg-shader"></canvas>
    
      
       <!--[if lt IE 7]>
@@ -2342,6 +2343,9 @@
 <!-- Credits: http://themeforest.net/user/FlexyCodes -->
 <script type="text/javascript" src="assets/js/main.js"></script>
 
+
+<!-- Three.js background effect (loaded only when the shader is active) -->
+<script type="module" src="assets/js/testScript2.js"></script>
 
 
 

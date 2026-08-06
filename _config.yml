@@ -7,7 +7,7 @@ baseurl: '/PanelCV' #change it according to your repository name
 #   video  -> <video> background only (safe everywhere, default)
 #   shader -> Three.js canvas effect only
 #   both   -> video + shader fused (screen blend); heaviest, needs a real GPU
-background_mode: video
+background_mode: both
 
 
 

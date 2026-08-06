@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8"> <![endif]-->  
+<!--[if IE 9]> <html lang="en" class="ie9"> <![endif]-->  
+<!--[if !IE]><!--> 
+<html lang="no-js"> <!--<![endif]-->  
+    <head>
+        <script src="assets/js/testScript.js" defer></script>
+        <title>Jhon CV</title>
+
+        <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+        <meta name="description" content="FlexyCodes - FlexyCard vCard Template. Creating my personal page!"/>
+
+        <!-- CSS | bootstrap -->
+        <!-- Credits: http://getbootstrap.com/ -->
+        <link  rel="stylesheet" type="text/css" href="assets/css/bootstrap.min.css" />
+
+        <!-- CSS | font-awesome -->
+        <!-- Credits: http://fortawesome.github.io/Font-Awesome/icons/ -->
+        <link rel="stylesheet" type="text/css" href="assets/css/font-awesome.min.css" />
+
+        <!-- CSS | animate -->
+        <!-- Credits: http://daneden.github.io/animate.css/ -->
+        <link rel="stylesheet" type="text/css" href="assets/css/animate.min.css" />
+
+        <!-- CSS | Normalize -->
+        <!-- Credits: http://manos.malihu.gr/jquery-custom-content-scroller -->
+        <link rel="stylesheet" type="text/css" href="assets/css/jquery.mCustomScrollbar.css" />
+        
+        <!-- CSS | Colors -->
+        <link rel="stylesheet" type="text/css" href="assets/css/colors/DarkBlue.css" id="colors-style" />
+        <link rel="stylesheet" type="text/css" href="assets/css/switcher.css" />
+        
+        <!-- CSS | Style -->
+        <!-- Credits: http://themeforest.net/user/FlexyCodes -->
+        <link rel="stylesheet" type="text/css" href="assets/css/main.css" />
+
+        <!-- CSS | prettyPhoto -->
+        <!-- Credits: http://www.no-margin-for-errors.com/ -->
+        <link rel="stylesheet" type="text/css" href="assets/css/prettyPhoto.css"/> 
+
+        <!-- CSS | Google Fonts -->
+        <link href='https://fonts.googleapis.com/css?family=Lato:300,400' rel='stylesheet' type='text/css'>
+        <!-- Favicon -->
+        <link rel="shortcut icon" type="image/x-icon" href="images/favicon/favicon.ico">
+
+        <!--[if IE 7]>
+                <link rel="stylesheet" type="text/css" href="assets/css/icons/font-awesome-ie7.min.css"/>
+        <![endif]-->
+
+        <style>
+            @media only screen and (max-width : 991px){
+                .resp-vtabs .resp-tabs-container {
+                    margin-left: 13px;
+                }
+            }
+            
+            @media only screen and (min-width : 800px) and (max-width : 991px){
+                .resp-vtabs .resp-tabs-container {
+                    margin-left: 13px;
+                    width:89%;
+                }
+            }       
+
+        </style>
+
+    </head>
+    <body>
+        <!-- some code -->
+    </body>
+
+<!-- jquery | jQuery 1.11.0 -->
+<!-- Credits: http://jquery.com -->
+<script type="text/javascript" src="assets/js/jquery.min.js"></script>
+
+<!-- Js | bootstrap -->
+<!-- Credits: http://getbootstrap.com/ -->
+<script type="text/javascript" src="assets/js/bootstrap.min.js"></script> 
+
+<!-- Js | jquery.cycle -->
+<!-- Credits: https://github.com/malsup/cycle2 -->
+<script type="text/javascript" src="assets/js/jquery.cycle2.min.js"></script>
+
+<!-- jquery | rotate and portfolio -->
+<!-- Credits: http://jquery.com -->
+<script type="text/javascript" src="assets/js/jquery.mixitup.min.js"></script> 
+<script type="text/javascript" src="assets/js/HeadImage.js"></script>
+
+<!-- Js | easyResponsiveTabs -->
+<!-- Credits: http://webtrendset.com/demo/easy-responsive-tabs/Index.html -->
+<script type="text/javascript" src="assets/js/easyResponsiveTabs.min.js"></script> 
+
+<!-- Js | jquery.cookie -->
+<!-- Credits: https://github.com/carhartl/jquery-cookie --> 
+<script type="text/javascript" src="assets/js/jsSwitcher/jquery.cookie.js"></script>   
+
+<!-- Js | switcher -->
+<!-- Credits: http://themeforest.net/user/FlexyCodes -->
+<script type="text/javascript" src="assets/js/jsSwitcher/switcher.js"></script>    
+
+<!-- Js | mCustomScrollbar -->
+<!-- Credits: http://manos.malihu.gr/jquery-custom-content-scroller -->
+<script type="text/javascript" src="assets/js/jquery.mCustomScrollbar.concat.min.js"></script>     
+
+<!-- jquery | prettyPhoto -->
+<!-- Credits: http://www.no-margin-for-errors.com/ -->
+<script type="text/javascript" src="assets/js/jquery.prettyPhoto.js"></script>
+
+<!-- Js | gmaps -->
+<!-- Credits: http://maps.google.com/maps/api/js?sensor=true-->
+
+<!-- <script type="text/javascript" src="assets/js/gmaps.min.js"></script> -->
+
+<!-- Js | Js -->
+<!-- Credits: http://themeforest.net/user/FlexyCodes -->
+<script type="text/javascript" src="assets/js/main.js"></script>
+<script type="text/javascript" src="assets/js/testScript.js"></script>
+
+
+
+<!-- code js for image rotate -->
+<script type="text/javascript">
+
+    var mouseX;
+    var mouseY;
+    var imageOne;
+
+    /* Calling the initialization function */
+    $(init);
+
+    /* The images need to re-initialize on load and on resize, or else the areas
+     * where each image is displayed will be wrong. */
+    $(window).load(init);
+    $(window).resize(init);
+
+    /* Setting the mousemove event caller */
+    $(window).mousemove(getMousePosition);
+
+    /* This function is called on document ready, on load and on resize
+     * and initiallizes all the images */
+    function init() {
+
+        /* Instanciate the mouse position variables */
+        mouseX = 2000;
+        mouseY = 0;
+        /* Instanciate a HeadImage class for every image */
+        imageOne = new HeadImage("one");
+        imageOne.setImageDirection()
+    }
+
+    /* This function is called on mouse move and gets the mouse position. 
+     * It also calls the HeadImage function to display the correct image*/
+    function getMousePosition(event) {
+
+        /* Setting the mouse position variables */
+        mouseX = event.pageX;
+        mouseY = event.pageY;
+
+        /*Calling the setImageDirection function of the HeadImage class
+         * to display the correct image*/
+        imageOne.setImageDirection();
+
+    }
+
+</script>
+<!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->

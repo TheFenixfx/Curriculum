@@ -2872,3 +2872,33 @@ div.ppt {
     z-index: -1; /* Place effect behind other content */
     object-fit: cover; /* Ensures video fills viewport without distortion */
 }
+
+/* --- Layered backgrounds: video + shader can fuse together --- */
+/* #background-effect above is now legacy/superseded by #bg-video + #bg-shader. */
+
+#bg-video {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -2;            /* base layer */
+    object-fit: cover;      /* fill viewport, no distortion */
+}
+
+#bg-shader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;            /* above the video, below page content */
+    pointer-events: none;   /* never block clicks meant for content */
+}
+
+/* Fuse the shader over the video ONLY in "both" mode.
+   screen blend: black pixels -> video shows through, bright pixels -> glow.
+   (Gated on a body class so shader-only mode renders normally, not washed out.) */
+body.bg-mode-both #bg-shader {
+    mix-blend-mode: screen;
+}

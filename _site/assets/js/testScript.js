@@ -2,9 +2,9 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.m
 
 export function initThreeScene() {
   // Get and style the canvas to fill the entire viewport.
-  const canvas = document.getElementById('background-effect');
+  const canvas = document.getElementById('bg-shader');
   if (!canvas) {
-    console.error("Canvas element with id 'background-effect' not found!");
+    console.error("Canvas element with id 'bg-shader' not found!");
     return;
   }
   canvas.style.width = '100%';
@@ -13,10 +13,14 @@ export function initThreeScene() {
   canvas.style.margin = '0';
   canvas.style.padding = '0';
 
-  // Create renderer.
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-  renderer.setPixelRatio(window.devicePixelRatio);
+  // alpha:true + transparent clear lets the canvas composite over the video.
+  // In "both" mode, CSS `mix-blend-mode: screen` fuses the shader over the video:
+  //   output BLACK where you want the video to show through,
+  //   bright where you want a glow. That is the contract the shader must follow.
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: false });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1)); // cap DPR — big win on HiDPI / integrated GPUs
   renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setClearColor(0x000000, 0); // fully transparent backdrop
 
   // Create scene.
   const scene = new THREE.Scene();

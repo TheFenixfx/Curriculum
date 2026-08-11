@@ -84,6 +84,13 @@ export function initAuroraCurtain() {
 
       out vec4 fragColor;
 
+      // Vertical band: real aurora borealis reads as a compact ribbon near the
+      // horizon, not a gradient filling the whole viewport height. BAND_CENTER/
+      // BAND_WIDTH confine the glow to a narrow strip; the noise-driven domain
+      // warp d still displaces it per-column, giving the wavy curtain folds.
+      #define BAND_CENTER 0.34
+      #define BAND_WIDTH  0.11
+
       void main() {
         vec2 fragCoord = gl_FragCoord.xy;
         vec2 uv = fragCoord.xy / u_resolution.xy;
@@ -91,9 +98,9 @@ export function initAuroraCurtain() {
         float o = texture(u_channel1, uv * 0.25 + vec2(0.0, u_time * 0.025)).r;
         float d = (texture(u_channel0, uv * 0.25 - vec2(0.0, u_time * 0.02 + o * 0.02)).r * 2.0 - 1.0);
 
-        float v = uv.y + d * 0.1;
-        v = 1.0 - abs(v * 2.0 - 1.0);
-        v = pow(v, 2.0 + sin((u_time * 0.2 + d * 0.25) * TAU) * 0.5);
+        float yy = (uv.y - BAND_CENTER + d * 0.05) / BAND_WIDTH;
+        float v = 1.0 - smoothstep(0.0, 1.0, abs(yy));
+        v = pow(v, 3.5 + sin((u_time * 0.2 + d * 0.25) * TAU) * 1.2);
 
         vec3 color = vec3(0.0);
 

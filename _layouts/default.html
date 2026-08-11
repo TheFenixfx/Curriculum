@@ -6,20 +6,7 @@
 <html lang="no-js"> <!--<![endif]-->  
 {% include head.html %}
 
-<body class="bg-mode-{{ site.background_mode | default: 'video' }}">
-   {% if site.background_mode == 'shader' %}
-   <canvas id="bg-shader"></canvas>
-   {% elsif site.background_mode == 'both' %}
-   <video id="bg-video" autoplay muted loop playsinline>
-      <source src="assets/video/bg.mp4" type="video/mp4">
-   </video>
-   <canvas id="bg-shader"></canvas>
-   {% else %}
-   <video id="bg-video" autoplay muted loop playsinline>
-      <source src="assets/video/bg.mp4" type="video/mp4">
-   </video>
-   {% endif %}
-     
+<body class="bg-mode-{{ site.background_mode | default: 'ascii' }}">
       {{content}}
       <!-- </div> -->
  

@@ -47,7 +47,7 @@
     contact:'Contact'
   };
   var POOL = Object.keys(BUTTON_WORDS).map(function(k){return BUTTON_WORDS[k];});
-  var PALETTE = ['#22e1ff','#ff3df0','#5b8cff','#a855f7','#9dff3d'];
+  var PALETTE = ['#22e1ff','#5b8cff','#a855f7','#9dff3d'];
 
   // Compact scale: keep the long words readable without dominating the page.
   var FIT_WIDTH_RATIO = 0.72;
